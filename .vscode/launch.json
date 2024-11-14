@@ -1,0 +1,52 @@
+{
+  "compounds": [
+    {
+      "name": "EvalLab",
+      "configurations": [
+        "EvalLab.AppHost",
+        "EvalLab.Client"
+      ]
+    }
+  ],
+  "configurations": [
+    {
+      "name": "EvalLab.AppHost",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}\\src\\EvalLab.AppHost\\EvalLab.AppHost.csproj",
+      "launchConfigurationId": "TargetFramework=;https"
+    },
+    {
+      "name": "EvalLab.Client",
+      "request": "launch",
+      "type": "msedge",
+      "webRoot": "${workspaceFolder}/src/EvalLab.Client",
+      "url": "https://localhost:4000"
+    },
+    {
+      "name": "EvalLab.API",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/EvalLab.API/bin/Debug/net9.0/EvalLab.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/EvalLab.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": ".NET Core Attach",
+      "type": "coreclr",
+      "request": "attach"
+    },
+  ]
+}
