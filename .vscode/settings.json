@@ -2,6 +2,7 @@
   "editor.formatOnSave": true,
   "dotnet.defaultSolution": "src/EvalLab.sln",
   "cSpell.words": [
+    "evallab",
     "OTEL",
     "Otlp"
   ]

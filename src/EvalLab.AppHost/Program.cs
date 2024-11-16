@@ -12,7 +12,6 @@ builder.AddNpmApp("client", "../EvalLab.Client")
   .WithReference(api)
   .WaitFor(api)
   .WithHttpsEndpoint(env: "PORT", port: 4000)
-  .WithExternalHttpEndpoints()
-  .PublishAsDockerFile();
+  .WithExternalHttpEndpoints();
 
 builder.Build().Run();
