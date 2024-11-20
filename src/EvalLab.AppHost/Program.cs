@@ -1,7 +1,11 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var mongo = builder.AddMongoDB("mongo").WithMongoExpress(containerName: "mongo-express");
-var mongodb = mongo.AddDatabase("mongodb", databaseName: "eval-lab");
+var mongo = builder.AddMongoDB("mongo")
+  .WithLifetime(ContainerLifetime.Persistent)
+  .WithDataVolume(name: "mongo-data")
+  .WithMongoExpress(containerName: "mongo-express");
+
+var mongodb = mongo.AddDatabase("mongodb", databaseName: "evallab");
 
 var api = builder.AddProject<Projects.EvalLab_API>("api")
   .WithReference(mongodb)
