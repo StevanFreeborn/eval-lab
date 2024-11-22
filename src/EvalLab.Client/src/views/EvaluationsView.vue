@@ -106,7 +106,7 @@
               v-for="(value, name) in item"
               :key="name"
             >
-              {{ value }}
+              {{ value instanceof Date ? value.toLocaleDateString() : value }}
             </td>
           </tr>
         </tbody>

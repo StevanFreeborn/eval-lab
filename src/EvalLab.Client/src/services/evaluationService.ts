@@ -33,7 +33,10 @@ export const evaluationsService: EvaluationsService = Object.freeze({
 
     const data = await response.json();
 
-    return result.success(data);
+    return result.success({
+      ...data,
+      items: data.items.map(createEvaluation),
+    });
   },
   async createEvaluation(newEvaluation) {
     const response = await fetch(BASE_URL, {
@@ -48,6 +51,17 @@ export const evaluationsService: EvaluationsService = Object.freeze({
 
     const data = await response.json();
 
-    return result.success(data);
+    return result.success(createEvaluation(data));
   },
 });
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createEvaluation(data: any): Evaluation {
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    createdDate: new Date(data.createdDate),
+    updatedDate: new Date(data.updatedDate),
+  };
+}
