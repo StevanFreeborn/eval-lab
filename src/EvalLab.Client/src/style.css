@@ -15,7 +15,20 @@ button {
   background: none;
   border: none;
   cursor: pointer;
+}
+
+input,
+button,
+textarea {
   color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input,
+textarea {
+  background-color: var(--background-color);
+  border: none;
 }
 
 a {

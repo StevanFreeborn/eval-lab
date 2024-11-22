@@ -20,7 +20,11 @@ builder.AddMongoDBClient("mongodb");
 
 builder.Services.AddOpenApi();
 
+builder.Services.AddCors();
+
 var app = builder.Build();
+
+app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 app.UseStatusCodePages();
 
@@ -51,7 +55,7 @@ app.MapGet("/evaluations", async (IMongoClient client, [FromQuery] int pageNumbe
   );
 
   var aggregation = await client.GetDatabase("evallab").GetCollection<Evaluation>("evaluations").Aggregate()
-    .SortByDescending(e => e.CreatedAt)
+    .SortByDescending(e => e.CreatedDate)
     .Facet(totalFacet, itemsFacet)
     .FirstOrDefaultAsync();
 
@@ -84,9 +88,22 @@ app.MapPost("/evaluations", async (IMongoClient client, [FromBody] AddEvaluation
 
 app.Run();
 
-record EvaluationDto(string Id, string Name, string Description)
+record EvaluationDto(
+  string Id,
+  string Name,
+  string Description,
+  DateTime CreatedDate,
+  DateTime UpdatedDate
+)
 {
-  public EvaluationDto(Evaluation evaluation) : this(evaluation.Id.ToString(), evaluation.Name, evaluation.Description) { }
+  public EvaluationDto(Evaluation evaluation) : this(
+    evaluation.Id.ToString(),
+    evaluation.Name,
+    evaluation.Description,
+    evaluation.CreatedDate,
+    evaluation.UpdatedDate
+  )
+  { }
 }
 
 record AddEvaluationDto(string Name, string Description)
@@ -113,8 +130,8 @@ class Evaluation
   public string Id { get; init; } = null!;
   public string Name { get; init; } = string.Empty;
   public string Description { get; init; } = string.Empty;
-  public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
-  public DateTime UpdatedAt { get; init; } = DateTime.UtcNow;
+  public DateTime CreatedDate { get; init; } = DateTime.UtcNow;
+  public DateTime UpdatedDate { get; init; } = DateTime.UtcNow;
 }
 
 static class EvaluationExtensions
@@ -138,8 +155,8 @@ static class ClassMap
       cm.MapIdProperty(e => e.Id).SetIdGenerator(StringObjectIdGenerator.Instance);
       cm.MapProperty(e => e.Name).SetElementName("name");
       cm.MapProperty(e => e.Description).SetElementName("description");
-      cm.MapProperty(e => e.CreatedAt).SetElementName("createdAt");
-      cm.MapProperty(e => e.UpdatedAt).SetElementName("updatedAt");
+      cm.MapProperty(e => e.CreatedDate).SetElementName("createdDate");
+      cm.MapProperty(e => e.UpdatedDate).SetElementName("updatedDate");
     });
   }
 }

@@ -1,29 +1,54 @@
 <script setup lang="ts">
-  import PencilIcon from '@/components/icons/PencilIcon.vue';
-  import TrashCanIcon from '@/components/icons/TrashCanIcon.vue';
-  import CirclePlusIcon from '@/components/icons/CirclePlusIcon.vue';
+  import PencilIcon from '../components/icons/PencilIcon.vue';
+  import TrashCanIcon from '../components/icons/TrashCanIcon.vue';
+  import CirclePlusIcon from '../components/icons/CirclePlusIcon.vue';
+  import AddEvaluationForm from '../components/forms/AddEvaluationForm.vue';
   import { RouterLink } from 'vue-router';
-  import { ref } from 'vue';
+  import { ref, onMounted } from 'vue';
+  import SlideDrawer from '../components/SlideDrawer.vue';
+  import { Evaluation, EvaluationsServiceKey } from '../services/evaluationService.ts';
+  import { useService } from '../composables/useService.ts';
+  import { convertToTitleCase } from '../shared/utils.ts';
+  import WaitingSpinner from '../components/WaitingSpinner.vue';
 
   const drawerOpen = ref(false);
 
-  const data = ref({
-    items: [
-      { id: 1, name: 'First evaluation', createdDate: '2022-01-01' },
-      { id: 2, name: 'Second evaluation', createdDate: '2022-01-02' },
-      { id: 3, name: 'Third evaluation', createdDate: '2022-01-03' },
-      { id: 4, name: 'Fourth evaluation', createdDate: '2022-01-04' },
-      { id: 5, name: 'Fifth evaluation', createdDate: '2022-01-05' },
-      { id: 6, name: 'Sixth evaluation', createdDate: '2022-01-06' },
-      { id: 7, name: 'Seventh evaluation', createdDate: '2022-01-07' },
-      { id: 8, name: 'Eighth evaluation', createdDate: '2022-01-08' },
-      { id: 9, name: 'Ninth evaluation', createdDate: '2022-01-09' },
-      { id: 10, name: 'Tenth evaluation', createdDate: '2022-01-10' },
-    ],
+  const data = ref<{
+    items: Evaluation[];
+    status: 'loading' | 'error' | 'success';
+  }>({
+    items: [],
+    status: 'loading',
   });
 
-  function convertToTitleCase(str: string) {
-    return str.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+  const evaluationsService = useService(EvaluationsServiceKey);
+
+  async function getEvaluations() {
+    const getEvaluationsResult = await evaluationsService.getEvaluations();
+
+    if (getEvaluationsResult.failed) {
+      console.error(getEvaluationsResult.error.message);
+      data.value.status = 'error';
+      return;
+    }
+
+    data.value.items = getEvaluationsResult.value.items;
+    data.value.status = 'success';
+  }
+
+  onMounted(getEvaluations);
+
+  function openDrawer() {
+    drawerOpen.value = true;
+  }
+
+  function closeDrawer() {
+    drawerOpen.value = false;
+  }
+
+  function handleNewEvaluation() {
+    getEvaluations();
+    closeDrawer();
   }
 </script>
 
@@ -33,23 +58,26 @@
       <h2>Evaluations</h2>
       <button
         type="button"
-        @click="
-          () => {
-            console.log('Create new evaluation');
-            drawerOpen = !drawerOpen;
-          }
-        "
+        @click="openDrawer"
       >
         <CirclePlusIcon />
+        <span class="sr-only">Add Evaluation</span>
       </button>
     </div>
     <div class="table-container">
-      <table>
+      <WaitingSpinner
+        v-if="data.status === 'loading'"
+        height="3rem"
+        width="3rem"
+      />
+      <div v-else-if="data.status === 'error'">Failed to load evaluations</div>
+      <div v-else-if="data.items.length === 0">No evaluations found</div>
+      <table v-else>
         <thead>
           <tr>
             <th></th>
             <th
-              v-for="(value, key) in data.items[0]"
+              v-for="(_, key) in data.items[0]"
               :key="key"
             >
               {{ convertToTitleCase(key) }}
@@ -64,17 +92,19 @@
             <td class="actions-container">
               <RouterLink :to="`/evaluations/${item.id}/edit`">
                 <PencilIcon />
+                <span class="sr-only">Edit</span>
               </RouterLink>
               <button
                 type="button"
                 @click="() => console.log('Delete', item.id)"
               >
                 <TrashCanIcon />
+                <span class="sr-only">Delete</span>
               </button>
             </td>
             <td
-              v-for="value in item"
-              :key="value"
+              v-for="(value, name) in item"
+              :key="name"
             >
               {{ value }}
             </td>
@@ -83,9 +113,13 @@
       </table>
     </div>
   </div>
-  <div :class="{ drawer: true, open: drawerOpen }">
-    <h3>Create new evaluation</h3>
-  </div>
+  <SlideDrawer
+    heading="Add Evaluation"
+    :drawer-open="drawerOpen"
+    @drawer-closed="closeDrawer"
+  >
+    <AddEvaluationForm @evaluation-added="handleNewEvaluation" />
+  </SlideDrawer>
 </template>
 
 <style scoped>
@@ -117,6 +151,9 @@
   }
 
   .table-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     --border: 1px solid var(--text-color);
     overflow-y: auto;
     scrollbar-width: thin;
@@ -192,28 +229,5 @@
       width: 1rem;
       height: 1rem;
     }
-  }
-
-  .drawer {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 0px;
-    background-color: var(--secondary-background-color);
-    transition: width 0.5s;
-    z-index: 2;
-    overflow: hidden;
-    border-top-left-radius: 0.5rem;
-    border-bottom-left-radius: 0.5rem;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-
-    h3 {
-      margin: 0.5rem;
-    }
-  }
-
-  .drawer.open {
-    width: 300px;
   }
 </style>

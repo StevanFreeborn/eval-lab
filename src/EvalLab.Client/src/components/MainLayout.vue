@@ -1,7 +1,7 @@
 <script setup lang="ts">
-  import PipelineIcon from '@/components/icons/PipelineIcon.vue';
-  import FlaskIcon from '@/components/icons/FlaskIcon.vue';
-  import RulerIcon from '@/components/icons/RulerIcon.vue';
+  import PipelineIcon from '../components/icons/PipelineIcon.vue';
+  import FlaskIcon from '../components/icons/FlaskIcon.vue';
+  import RulerIcon from '../components/icons/RulerIcon.vue';
   import { RouterView, RouterLink } from 'vue-router';
 </script>
 
