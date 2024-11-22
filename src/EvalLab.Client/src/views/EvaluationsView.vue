@@ -2,9 +2,11 @@
   import PencilIcon from '../components/icons/PencilIcon.vue';
   import TrashCanIcon from '../components/icons/TrashCanIcon.vue';
   import CirclePlusIcon from '../components/icons/CirclePlusIcon.vue';
-  import AddEvaluationForm from '../components/forms/AddEvaluationForm.vue';
+  import AddEvaluationForm, {
+    AddEvaluationFormComponent,
+  } from '../components/forms/AddEvaluationForm.vue';
   import { RouterLink } from 'vue-router';
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, useTemplateRef } from 'vue';
   import SlideDrawer from '../components/SlideDrawer.vue';
   import { Evaluation, EvaluationsServiceKey } from '../services/evaluationService.ts';
   import { useService } from '../composables/useService.ts';
@@ -12,6 +14,8 @@
   import WaitingSpinner from '../components/WaitingSpinner.vue';
 
   const drawerOpen = ref(false);
+
+  const addEvalForm = useTemplateRef<AddEvaluationFormComponent>('addEvalForm');
 
   const data = ref<{
     items: Evaluation[];
@@ -38,7 +42,10 @@
 
   onMounted(getEvaluations);
 
+  onMounted(() => {});
+
   function openDrawer() {
+    addEvalForm.value?.nameInput?.focus();
     drawerOpen.value = true;
   }
 
@@ -49,6 +56,23 @@
   function handleNewEvaluation() {
     getEvaluations();
     closeDrawer();
+  }
+
+  async function deleteEvaluation(id: string) {
+    const isSure = confirm('Are you sure you want to delete this evaluation?');
+
+    if (!isSure) {
+      return;
+    }
+
+    const deleteEvaluationResult = await evaluationsService.deleteEvaluation(id);
+
+    if (deleteEvaluationResult.failed) {
+      console.error(deleteEvaluationResult.error.message);
+      return;
+    }
+
+    getEvaluations();
   }
 </script>
 
@@ -96,7 +120,7 @@
               </RouterLink>
               <button
                 type="button"
-                @click="() => console.log('Delete', item.id)"
+                @click="() => deleteEvaluation(item.id)"
               >
                 <TrashCanIcon />
                 <span class="sr-only">Delete</span>
@@ -118,7 +142,10 @@
     :drawer-open="drawerOpen"
     @drawer-closed="closeDrawer"
   >
-    <AddEvaluationForm @evaluation-added="handleNewEvaluation" />
+    <AddEvaluationForm
+      ref="addEvalForm"
+      @evaluation-added="handleNewEvaluation"
+    />
   </SlideDrawer>
 </template>
 
@@ -126,6 +153,7 @@
   .container {
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: 1rem;
     overflow: hidden;
   }
@@ -153,6 +181,7 @@
   .table-container {
     display: flex;
     flex-direction: column;
+    flex: 1;
     align-items: center;
     --border: 1px solid var(--text-color);
     overflow-y: auto;

@@ -7,14 +7,15 @@ type NewEvaluation = {
 };
 
 export type Evaluation = NewEvaluation & {
-  id: number;
+  id: string;
   createdDate: Date;
   updatedDate: Date;
 };
 
 type EvaluationsService = {
-  getEvaluations(): Promise<Result<Page<Evaluation>>>;
   createEvaluation(newEvaluation: NewEvaluation): Promise<Result<Evaluation>>;
+  getEvaluations(): Promise<Result<Page<Evaluation>>>;
+  deleteEvaluation(id: string): Promise<Result<true>>;
 };
 
 type EvaluationsServiceKeyType = InjectionKey<EvaluationsService>;
@@ -24,20 +25,6 @@ export const EvaluationsServiceKey: EvaluationsServiceKeyType = Symbol('Evaluati
 const BASE_URL = '/api/evaluations';
 
 export const evaluationsService: EvaluationsService = Object.freeze({
-  async getEvaluations() {
-    const response = await fetch(BASE_URL);
-
-    if (response.ok === false) {
-      return result.failure(new Error('Failed to get evaluations'));
-    }
-
-    const data = await response.json();
-
-    return result.success({
-      ...data,
-      items: data.items.map(createEvaluation),
-    });
-  },
   async createEvaluation(newEvaluation) {
     const response = await fetch(BASE_URL, {
       method: 'POST',
@@ -52,6 +39,29 @@ export const evaluationsService: EvaluationsService = Object.freeze({
     const data = await response.json();
 
     return result.success(createEvaluation(data));
+  },
+  async getEvaluations() {
+    const response = await fetch(BASE_URL);
+
+    if (response.ok === false) {
+      return result.failure(new Error('Failed to get evaluations'));
+    }
+
+    const data = await response.json();
+
+    return result.success({
+      ...data,
+      items: data.items.map(createEvaluation),
+    });
+  },
+  async deleteEvaluation(id) {
+    const response = await fetch(`${BASE_URL}/${id}`, { method: 'DELETE' });
+
+    if (response.ok === false) {
+      return result.failure(new Error('Failed to delete evaluation'));
+    }
+
+    return result.success(true);
   },
 });
 

@@ -45,7 +45,7 @@
     gap: 0.25rem;
     background: linear-gradient(
       90deg,
-      var(--secondary-background-color) 50%,
+      var(--secondary-background-color) 40%,
       var(--background-color) 100%
     );
     width: max-content;

@@ -34,6 +34,18 @@ app.MapOpenApi();
 
 app.MapDefaultEndpoints();
 
+app.MapPost("/evaluations", async (IMongoClient client, [FromBody] AddEvaluationDto dto) =>
+{
+  if (dto.TryValidate(out var results) is false)
+  {
+    return Results.ValidationProblem(results.ToErrors());
+  }
+
+  var evaluation = dto.ToEvaluation();
+  await client.GetDatabase("evallab").GetCollection<Evaluation>("evaluations").InsertOneAsync(evaluation);
+  return Results.Created($"/evaluations/{evaluation.Id}", evaluation.ToDto());
+});
+
 app.MapGet("/evaluations", async (IMongoClient client, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 50) =>
 {
   var totalFacet = AggregateFacet.Create(
@@ -74,16 +86,10 @@ app.MapGet("/evaluations/{id}", async (IMongoClient client, string id) =>
   return evaluation is not null ? Results.Ok(evaluation.ToDto()) : Results.NotFound();
 });
 
-app.MapPost("/evaluations", async (IMongoClient client, [FromBody] AddEvaluationDto dto) =>
+app.MapDelete("/evaluations/{id}", async (IMongoClient client, string id) =>
 {
-  if (dto.TryValidate(out var results) is false)
-  {
-    return Results.ValidationProblem(results.ToErrors());
-  }
-
-  var evaluation = dto.ToEvaluation();
-  await client.GetDatabase("evallab").GetCollection<Evaluation>("evaluations").InsertOneAsync(evaluation);
-  return Results.Created($"/evaluations/{evaluation.Id}", evaluation.ToDto());
+  var result = await client.GetDatabase("evallab").GetCollection<Evaluation>("evaluations").DeleteOneAsync(e => e.Id == id);
+  return result.DeletedCount is 1 ? Results.NoContent() : Results.NotFound();
 });
 
 app.Run();

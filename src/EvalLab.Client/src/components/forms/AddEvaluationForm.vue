@@ -1,8 +1,20 @@
 <script setup lang="ts">
-  import { ref, defineEmits } from 'vue';
+  import { ref, defineEmits, useTemplateRef, Ref, UnwrapNestedRefs } from 'vue';
   import { EvaluationsServiceKey } from '../../services/evaluationService.ts';
   import { useService } from '../../composables/useService.ts';
   import WaitingSpinner from '../WaitingSpinner.vue';
+
+  const nameInput = useTemplateRef<HTMLInputElement>('nameInput');
+
+  type AddEvaluationFormComponentWrapped = {
+    nameInput: Ref<HTMLInputElement | null>;
+  };
+
+  export type AddEvaluationFormComponent = UnwrapNestedRefs<AddEvaluationFormComponentWrapped>;
+
+  defineExpose<AddEvaluationFormComponentWrapped>({
+    nameInput,
+  });
 
   const emit = defineEmits<{
     (e: 'evaluation-added'): void;
@@ -76,12 +88,12 @@
     <div class="form-group">
       <label for="name">Name</label>
       <input
+        ref="nameInput"
         v-model="newEvaluation.name.value"
         type="text"
         id="name"
         name="name"
         required
-        autofocus
       />
       <p class="error">{{ newEvaluation.name.error }}</p>
     </div>
