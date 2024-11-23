@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EvalLab.API\EvalLab.API.csproj" />
+    <ProjectReference Include="..\EvalLab.TracesAPI\EvalLab.TracesAPI.csproj" />
   </ItemGroup>
 
 </Project>

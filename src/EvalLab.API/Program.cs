@@ -10,6 +10,8 @@ using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddRequestDecompression();
+
 builder.Services.AddProblemDetails();
 
 builder.AddServiceDefaults();
@@ -23,6 +25,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddCors();
 
 var app = builder.Build();
+
+app.UseRequestDecompression();
 
 app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
