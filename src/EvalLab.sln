@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvalLab.API", "EvalLab.API\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvalLab.ServiceDefaults", "EvalLab.ServiceDefaults\EvalLab.ServiceDefaults.csproj", "{F7CAF040-8B68-4CF5-AFE3-E3323D116EE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvalLab.TracesAPI", "EvalLab.TracesAPI\EvalLab.TracesAPI.csproj", "{36205F75-0870-48AF-9DB3-6DFEE54958AE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvalLab.OTEL", "EvalLab.OTEL\EvalLab.OTEL.csproj", "{0E377FB0-A5CF-4665-A37E-FD0F60F9871C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,9 +32,9 @@ Global
 		{F7CAF040-8B68-4CF5-AFE3-E3323D116EE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7CAF040-8B68-4CF5-AFE3-E3323D116EE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7CAF040-8B68-4CF5-AFE3-E3323D116EE1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{36205F75-0870-48AF-9DB3-6DFEE54958AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{36205F75-0870-48AF-9DB3-6DFEE54958AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{36205F75-0870-48AF-9DB3-6DFEE54958AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{36205F75-0870-48AF-9DB3-6DFEE54958AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E377FB0-A5CF-4665-A37E-FD0F60F9871C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E377FB0-A5CF-4665-A37E-FD0F60F9871C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E377FB0-A5CF-4665-A37E-FD0F60F9871C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E377FB0-A5CF-4665-A37E-FD0F60F9871C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

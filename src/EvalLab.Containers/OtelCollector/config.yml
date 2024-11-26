@@ -7,6 +7,15 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
+  tail_sampling/evaluations:
+    decision_wait: 1s
+    policies: [
+      {
+        name: evaluations,
+        type: boolean_attribute,
+        boolean_attribute: {key: evallab.evaluation.run, value: true}
+      }
+    ]
   batch:
 
 exporters:
@@ -19,7 +28,7 @@ exporters:
     tls:
         insecure: true
   otlphttp:
-    endpoint: ${env:services__tracesApi__http__0}
+    endpoint: ${env:services__api__http__0}
     encoding: json
     tls:
       insecure: true
@@ -29,7 +38,11 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/aspire, otlphttp]
+      exporters: [otlp/aspire]
+    traces/evaluations:
+      receivers: [otlp]
+      processors: [tail_sampling/evaluations, batch]
+      exporters: [otlphttp]
     metrics:
       receivers: [otlp]
       processors: [batch]

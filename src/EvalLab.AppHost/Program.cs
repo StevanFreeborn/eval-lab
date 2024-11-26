@@ -32,12 +32,7 @@ var api = builder.AddProject<Projects.EvalLab_API>("api")
   .WaitFor(mongodb)
   .WithExternalHttpEndpoints();
 
-var tracesApi = builder.AddProject<Projects.EvalLab_TracesAPI>("tracesApi")
-  .WithReference(mongodb)
-  .WaitFor(mongodb)
-  .WithExternalHttpEndpoints();
-
-collector.WithReference(tracesApi);
+collector.WithReference(api);
 
 builder.AddNpmApp("client", "../EvalLab.Client")
   .WithReference(api)

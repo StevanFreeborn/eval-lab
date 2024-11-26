@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EvalLab.ServiceDefaults\EvalLab.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\EvalLab.OTEL\EvalLab.OTEL.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,12 +1,19 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using EvalLab.ServiceDefaults;
+
+using Google.Protobuf;
 
 using Microsoft.AspNetCore.Mvc;
 
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
+
+using OpenTelemetry.Proto.Trace.V1;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +39,10 @@ app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(
 
 app.UseStatusCodePages();
 
-app.UseHttpsRedirection();
+// Collector is sending traces to the OTLP endpoint
+// over http...problem with container talking to
+// host.docker.internal...need to come back to this
+// app.UseHttpsRedirection();
 
 app.MapOpenApi();
 
@@ -52,6 +62,8 @@ app.MapPost("/evaluations", async (IMongoClient client, [FromBody] AddEvaluation
 
 app.MapGet("/evaluations", async (IMongoClient client, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 50) =>
 {
+  Activity.Current?.SetTag("evallab.evaluation.run", true);
+
   var totalFacet = AggregateFacet.Create(
     "count",
     PipelineDefinition<Evaluation, AggregateCountResult>.Create(
@@ -94,6 +106,13 @@ app.MapDelete("/evaluations/{id}", async (IMongoClient client, string id) =>
 {
   var result = await client.GetDatabase("evallab").GetCollection<Evaluation>("evaluations").DeleteOneAsync(e => e.Id == id);
   return result.DeletedCount is 1 ? Results.NoContent() : Results.NotFound();
+});
+
+app.MapPost("/v1/traces", ([FromBody] JsonElement traceData) =>
+{
+  var jsonText = traceData.GetRawText();
+  var trace = TracesData.Parser.ParseJson(jsonText);
+  return Results.Ok();
 });
 
 app.Run();
