@@ -6,6 +6,7 @@
     "evallab",
     "OTEL",
     "Otlp",
+    "otlphttp",
     "Validatable"
   ]
 }
