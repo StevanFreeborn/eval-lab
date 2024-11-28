@@ -9,6 +9,10 @@ export const router = createRouter({
       children: [
         {
           path: '',
+          component: () => import('./views/BenchView.vue'),
+        },
+        {
+          path: 'evaluations',
           component: () => import('./views/EvaluationsView.vue'),
         },
         {

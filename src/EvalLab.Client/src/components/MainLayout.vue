@@ -2,6 +2,7 @@
   import PipelineIcon from '../components/icons/PipelineIcon.vue';
   import FlaskIcon from '../components/icons/FlaskIcon.vue';
   import RulerIcon from '../components/icons/RulerIcon.vue';
+  import MicroscopeIcon from '../components/icons/MicroscopeIcon.vue';
   import { RouterView, RouterLink } from 'vue-router';
 </script>
 
@@ -16,6 +17,12 @@
         <ul>
           <li>
             <RouterLink to="/">
+              <MicroscopeIcon />
+              Bench
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/evaluations">
               <RulerIcon />
               Evaluations
             </RouterLink>

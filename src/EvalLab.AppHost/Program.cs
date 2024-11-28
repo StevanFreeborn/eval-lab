@@ -10,7 +10,6 @@ var aspireOtlpEndpoint = builder.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_U
 var aspireOtlpApiKey = builder.Configuration["AppHost:OtlpApiKey"];
 
 var collector = builder.AddContainer("otel-collector", "ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib")
-  .WithLifetime(ContainerLifetime.Persistent)
   .WithBindMount("../EvalLab.Containers/OtelCollector/config.yml", "/etc/otelcol-contrib/config.yaml")
   .WithEndpoint(port: 4317, targetPort: 4317, name: "grpc", scheme: "http")
   .WithEndpoint(port: 4318, targetPort: 4318, name: "http", scheme: "http")
@@ -20,7 +19,6 @@ var collector = builder.AddContainer("otel-collector", "ghcr.io/open-telemetry/o
 collector.ApplicationBuilder.Services.TryAddLifecycleHook<ReplaceOtelEndpointHost>();
 
 var mongo = builder.AddMongoDB("mongo")
-  .WithLifetime(ContainerLifetime.Persistent)
   .WithDataVolume(name: "mongo-data")
   .WithMongoExpress(containerName: "mongo-express")
   .WaitFor(collector);

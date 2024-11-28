@@ -1,12 +1,19 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.addMissingImports": "always",
+    "source.fixAll": "always",
+    "source.organizeImports": "always"
+  },
   "editor.formatOnSave": true,
   "dotnet.defaultSolution": "src/EvalLab.sln",
   "cSpell.words": [
     "Bson",
     "evallab",
     "OTEL",
+    "otelcol",
     "Otlp",
     "otlphttp",
+    "tseslint",
     "Validatable"
   ]
 }
