@@ -1,26 +1,26 @@
 <script setup lang="ts">
   import { defineEmits, Ref, UnwrapRef, useTemplateRef } from 'vue';
   import { useService } from '../../composables/useService.ts';
-  import { EvaluationsServiceKey } from '../../services/evaluationService.ts';
+  import { PipelinesServiceKey } from '../../services/pipelineService';
   import GenericForm, { GenericFormComponent } from './GenericForm.vue';
 
   const form = useTemplateRef<GenericFormComponent>('form');
 
-  export type AddEvaluationFormComponentWrapped = {
+  export type AddPipelineFormComponentWrapped = {
     form: Ref<GenericFormComponent | null>;
   };
 
-  export type AddEvaluationFormComponent = UnwrapRef<AddEvaluationFormComponentWrapped>;
+  export type AddPipelineFormComponent = UnwrapRef<AddPipelineFormComponentWrapped>;
 
-  defineExpose<AddEvaluationFormComponentWrapped>({
+  defineExpose<AddPipelineFormComponentWrapped>({
     form: form,
   });
 
   const emit = defineEmits<{
-    (e: 'evaluation-added'): void;
+    (e: 'pipeline-added'): void;
   }>();
 
-  const evaluationsService = useService(EvaluationsServiceKey);
+  const pipelinesService = useService(PipelinesServiceKey);
 </script>
 
 <template>
@@ -34,6 +34,12 @@
         type: 'text',
       },
       {
+        name: 'endpoint',
+        label: 'Endpoint',
+        required: true,
+        type: 'text',
+      },
+      {
         name: 'description',
         label: 'Description',
         required: false,
@@ -41,14 +47,15 @@
       },
     ]"
     :on-submit="
-      async ({ name, description }) => {
-        return await evaluationsService.create({
+      async ({ name, endpoint, description }) => {
+        return await pipelinesService.create({
           name: name,
           description: description,
+          endpoint: endpoint,
         });
       }
     "
-    @form-submitted="emit('evaluation-added')"
+    @form-submitted="emit('pipeline-added')"
     submit-button-label="Add"
   />
 </template>

@@ -1,7 +1,12 @@
 import { createApp } from 'vue';
-import './style.css';
+import { evaluationsService, EvaluationsServiceKey } from '../src/services/evaluationService';
 import App from './App.vue';
 import { router } from './router';
-import { EvaluationsServiceKey, evaluationsService } from '../src/services/evaluationService';
+import { pipelinesService, PipelinesServiceKey } from './services/pipelineService';
+import './style.css';
 
-createApp(App).provide(EvaluationsServiceKey, evaluationsService).use(router).mount('#app');
+createApp(App)
+  .provide(EvaluationsServiceKey, evaluationsService)
+  .provide(PipelinesServiceKey, pipelinesService)
+  .use(router)
+  .mount('#app');

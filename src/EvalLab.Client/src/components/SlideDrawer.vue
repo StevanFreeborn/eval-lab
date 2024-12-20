@@ -1,6 +1,6 @@
 <script setup lang="ts">
-  import CircleXMarkIcon from './icons/CircleXMarkIcon.vue';
   import { defineProps } from 'vue';
+  import CircleXMarkIcon from './icons/CircleXMarkIcon.vue';
 
   const props = defineProps<{
     heading: string;
@@ -53,7 +53,7 @@
   }
 
   .drawer.open {
-    width: 300px;
+    width: 350px;
   }
 
   .drawer-header {

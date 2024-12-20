@@ -1,21 +1,21 @@
 <script setup lang="ts">
-  import PencilIcon from '../components/icons/PencilIcon.vue';
-  import TrashCanIcon from '../components/icons/TrashCanIcon.vue';
-  import CirclePlusIcon from '../components/icons/CirclePlusIcon.vue';
+  import { onMounted, ref, useTemplateRef } from 'vue';
+  import { RouterLink } from 'vue-router';
+  import SlideDrawer from '../components/SlideDrawer.vue';
+  import WaitingSpinner from '../components/WaitingSpinner.vue';
+  import AddButton from '../components/buttons/AddButton.vue';
   import AddEvaluationForm, {
     AddEvaluationFormComponent,
   } from '../components/forms/AddEvaluationForm.vue';
-  import { RouterLink } from 'vue-router';
-  import { ref, onMounted, useTemplateRef } from 'vue';
-  import SlideDrawer from '../components/SlideDrawer.vue';
-  import { Evaluation, EvaluationsServiceKey } from '../services/evaluationService.ts';
+  import PencilIcon from '../components/icons/PencilIcon.vue';
+  import TrashCanIcon from '../components/icons/TrashCanIcon.vue';
   import { useService } from '../composables/useService.ts';
+  import { Evaluation, EvaluationsServiceKey } from '../services/evaluationService.ts';
   import { convertToTitleCase } from '../shared/utils.ts';
-  import WaitingSpinner from '../components/WaitingSpinner.vue';
 
   const drawerOpen = ref(false);
 
-  const addEvalForm = useTemplateRef<AddEvaluationFormComponent>('addEvalForm');
+  const addForm = useTemplateRef<AddEvaluationFormComponent>('addForm');
 
   const data = ref<{
     items: Evaluation[];
@@ -28,7 +28,7 @@
   const evaluationsService = useService(EvaluationsServiceKey);
 
   async function getEvaluations() {
-    const getEvaluationsResult = await evaluationsService.getEvaluations();
+    const getEvaluationsResult = await evaluationsService.getAll();
 
     if (getEvaluationsResult.failed) {
       console.error(getEvaluationsResult.error.message);
@@ -42,10 +42,11 @@
 
   onMounted(getEvaluations);
 
-  onMounted(() => {});
-
   function openDrawer() {
-    addEvalForm.value?.nameInput?.focus();
+    if (addForm.value?.form?.fieldRefs) {
+      addForm.value?.form?.fieldRefs[0]?.focus();
+    }
+
     drawerOpen.value = true;
   }
 
@@ -65,7 +66,7 @@
       return;
     }
 
-    const deleteEvaluationResult = await evaluationsService.deleteEvaluation(id);
+    const deleteEvaluationResult = await evaluationsService.delete(id);
 
     if (deleteEvaluationResult.failed) {
       console.error(deleteEvaluationResult.error.message);
@@ -80,13 +81,11 @@
   <div class="container">
     <div class="heading-container">
       <h2>Evaluations</h2>
-      <button
+      <AddButton
+        label="Add Evaluation"
         type="button"
-        @click="openDrawer"
-      >
-        <CirclePlusIcon />
-        <span class="sr-only">Add Evaluation</span>
-      </button>
+        @clicked="openDrawer"
+      />
     </div>
     <div class="table-container">
       <WaitingSpinner
@@ -113,18 +112,20 @@
             v-for="item in data.items"
             :key="item.id"
           >
-            <td class="actions-container">
-              <RouterLink :to="`/evaluations/${item.id}/edit`">
-                <PencilIcon />
-                <span class="sr-only">Edit</span>
-              </RouterLink>
-              <button
-                type="button"
-                @click="() => deleteEvaluation(item.id)"
-              >
-                <TrashCanIcon />
-                <span class="sr-only">Delete</span>
-              </button>
+            <td>
+              <div class="actions-container">
+                <RouterLink :to="`/evaluations/${item.id}/edit`">
+                  <PencilIcon />
+                  <span class="sr-only">Edit</span>
+                </RouterLink>
+                <button
+                  type="button"
+                  @click="() => deleteEvaluation(item.id)"
+                >
+                  <TrashCanIcon />
+                  <span class="sr-only">Delete</span>
+                </button>
+              </div>
             </td>
             <td
               v-for="(value, name) in item"
@@ -143,7 +144,7 @@
     @drawer-closed="closeDrawer"
   >
     <AddEvaluationForm
-      ref="addEvalForm"
+      ref="addForm"
       @evaluation-added="handleNewEvaluation"
     />
   </SlideDrawer>
@@ -162,20 +163,6 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-
-    button {
-      background-color: var(--secondary-background-color);
-      border: 1px solid var(--text-color);
-      border-radius: 0.25rem;
-      padding: 0.25rem;
-      cursor: pointer;
-    }
-
-    svg {
-      display: block;
-      width: 1rem;
-      height: 1rem;
-    }
   }
 
   .table-container {
