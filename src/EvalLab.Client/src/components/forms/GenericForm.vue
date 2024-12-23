@@ -11,23 +11,23 @@
     [key: string]: FormField;
   };
 
-  interface FormFieldDefinition {
+  type FormFieldDefinition = {
     name: string;
     label: string;
     type: 'text' | 'textarea';
     required?: boolean;
     rows?: number;
-  }
+  };
 
   type FieldNames<T extends readonly FormFieldDefinition[]> = {
     [K in T[number]['name']]: string;
   };
 
-  interface Props<T extends readonly FormFieldDefinition[]> {
+  type Props<T extends readonly FormFieldDefinition[]> = {
     fields: T;
     onSubmit: (data: FieldNames<T>) => Promise<{ failed: boolean; error?: { message: string } }>;
     submitButtonLabel: string;
-  }
+  };
 
   const props = defineProps<Props<readonly FormFieldDefinition[]>>();
   const firstField = useTemplateRef<HTMLElement[]>('firstField');

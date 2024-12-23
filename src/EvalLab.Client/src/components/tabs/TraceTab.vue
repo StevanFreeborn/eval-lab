@@ -1,4 +1,8 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+  import { defineProps } from 'vue';
+
+  defineProps<{ content: string }>();
+</script>
 
 <template>
   <div class="tab-content">

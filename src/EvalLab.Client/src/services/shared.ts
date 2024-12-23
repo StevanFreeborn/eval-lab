@@ -21,6 +21,7 @@ export const result = Object.freeze({
 
 export type Entity = {
   id: string;
+  name: string;
   createdDate: Date;
   updatedDate: Date;
 };
@@ -50,8 +51,26 @@ export function createGenericService<NewT, T extends Entity>(
       return result.success(mapFn(response.value));
     },
 
-    async getAll(): Promise<Result<Page<T>>> {
-      const response = await makeRequest<Page<T>>(baseUrl, { method: 'GET' });
+    async getAll(
+      pageNumber: number = 1,
+      pageSize: number = 50,
+      sortBy: string = 'createdDate',
+      sortOrder: 'asc' | 'desc' = 'desc',
+      name: string = '',
+    ): Promise<Result<Page<T>>> {
+      const searchParams = new URLSearchParams();
+      searchParams.append('pageNumber', pageNumber.toString());
+      searchParams.append('pageSize', pageSize.toString());
+      searchParams.append('sortBy', sortBy);
+      searchParams.append('sortOrder', sortOrder);
+
+      if (!name) {
+        searchParams.append('name', name);
+      }
+
+      const response = await makeRequest<Page<T>>(`${baseUrl}?${searchParams.toString()}`, {
+        method: 'GET',
+      });
 
       if (response.failed) {
         return response;
@@ -69,7 +88,7 @@ export function createGenericService<NewT, T extends Entity>(
   };
 }
 
-async function makeRequest<T>(url: string, options: RequestInit): Promise<Result<T>> {
+export async function makeRequest<T>(url: string, options: RequestInit): Promise<Result<T>> {
   try {
     const response = await fetch(url, options);
 

@@ -19,25 +19,34 @@
 
   const data = ref<{
     items: Evaluation[];
-    status: 'loading' | 'error' | 'success';
+    status: 'loading' | 'error' | 'success' | '';
   }>({
     items: [],
-    status: 'loading',
+    status: '',
   });
 
   const evaluationsService = useService(EvaluationsServiceKey);
 
   async function getEvaluations() {
-    const getEvaluationsResult = await evaluationsService.getAll();
+    const timeout = setTimeout(() => {
+      data.value.status = 'loading';
+    }, 500);
 
-    if (getEvaluationsResult.failed) {
-      console.error(getEvaluationsResult.error.message);
-      data.value.status = 'error';
-      return;
+    try {
+      const getEvaluationsResult = await evaluationsService.getAll();
+
+      if (getEvaluationsResult.failed) {
+        console.error(getEvaluationsResult.error.message);
+        data.value.status = 'error';
+        return;
+      }
+
+      data.value.items = getEvaluationsResult.value.items;
+      data.value.status = 'success';
+      return getEvaluationsResult.value;
+    } finally {
+      clearTimeout(timeout);
     }
-
-    data.value.items = getEvaluationsResult.value.items;
-    data.value.status = 'success';
   }
 
   onMounted(getEvaluations);
@@ -94,8 +103,8 @@
         width="3rem"
       />
       <div v-else-if="data.status === 'error'">Failed to load evaluations</div>
-      <div v-else-if="data.items.length === 0">No evaluations found</div>
-      <table v-else>
+      <div v-else-if="data.items.length === 0 && data.status">No evaluations found</div>
+      <table v-else-if="data.status">
         <thead>
           <tr>
             <th></th>

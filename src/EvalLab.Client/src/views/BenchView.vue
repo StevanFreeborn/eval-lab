@@ -1,29 +1,47 @@
 <script setup lang="ts">
-  import { ref, nextTick } from 'vue';
+  import { nextTick, ref } from 'vue';
+  import PagedDropdown, { Option } from '../components/controls/PagedDropdown.vue';
   import PlayIcon from '../components/icons/PlayIcon.vue';
   import ResponseTab from '../components/tabs/ResponseTab.vue';
   import TraceTab from '../components/tabs/TraceTab.vue';
   import WaitingSpinner from '../components/WaitingSpinner.vue';
+  import { useService } from '../composables/useService.ts';
+  import { PipelinesServiceKey } from '../services/pipelineService.ts';
 
+  const selectedPipeline = ref<Option>({ id: '', name: '' });
   const input = ref('');
   const isRunning = ref(false);
   const response = ref('');
 
+  const pipelinesService = useService(PipelinesServiceKey);
+
   // TODO: Actually send input to pipeline via API and get response
+  // TODO: Make an actual form?
   async function handleSubmit() {
+    if (!selectedPipeline.value.id) {
+      alert('Please select a pipeline');
+      return;
+    }
+
     if (!input.value) {
       alert('Please provide an input');
       return;
     }
 
     isRunning.value = true;
-    console.log('Running input:', input.value);
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const result = await pipelinesService.run(selectedPipeline.value.id, input.value);
 
-    console.log('Input ran successfully');
-    isRunning.value = false;
-    response.value = 'This is the response from the pipeline';
+      if (result.failed) {
+        console.error(result.error.message);
+        return;
+      }
+
+      response.value = result.value.output;
+    } finally {
+      isRunning.value = false;
+    }
   }
 
   const tabs = [
@@ -76,7 +94,19 @@
         @submit.prevent="handleSubmit"
         novalidate
       >
+        <PagedDropdown
+          :get-options="pipelinesService.getAll"
+          :map-option="i => ({ id: i.id, name: i.name })"
+          sort-by="name"
+          sort-order="asc"
+          v-model="selectedPipeline"
+          placeholder="Select a pipeline"
+          search-placeholder="Search pipelines"
+          :required="true"
+          :disabled="true"
+        />
         <textarea
+          :disabled="!selectedPipeline.id ? true : false"
           v-model="input"
           id="input"
           name="input"
@@ -186,6 +216,11 @@
 
   textarea:required {
     border-left: 1px solid red;
+  }
+
+  textarea:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .run-button {
