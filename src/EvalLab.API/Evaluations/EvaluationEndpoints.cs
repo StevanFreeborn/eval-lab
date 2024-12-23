@@ -1,13 +1,7 @@
-using System.Diagnostics;
-
 using EvalLab.API.Common;
 using EvalLab.API.Data;
 
 using Microsoft.AspNetCore.Mvc;
-
-using MongoDB.Driver;
-
-using ZstdSharp.Unsafe;
 
 namespace EvalLab.API.Evaluations;
 
@@ -31,19 +25,25 @@ static class EvaluationEndpoints
 
     group.MapGet(string.Empty, async ([FromServices] IRepository<Evaluation> repo, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 50) =>
     {
-      var page = await repo.GetAsync(pageNumber, pageSize);
+      var page = await repo.GetAsync(
+        pageNumber,
+        pageSize,
+        FilterSpecification<Evaluation>.All,
+        SortSpecification<Evaluation>.SortByDesc(e => e.CreatedDate)
+      );
+
       return Results.Ok(PageDto<EvaluationDto>.FromPage(page, EvaluationDto.From));
     });
 
     group.MapGet("{id}", async (string id, [FromServices] IRepository<Evaluation> repo) =>
     {
-      var evaluation = await repo.GetAsync(e => e.Id == id);
+      var evaluation = await repo.GetAsync(FilterSpecification<Evaluation>.From(e => e.Id == id));
       return evaluation is not null ? Results.Ok(EvaluationDto.From(evaluation)) : Results.NotFound();
     });
 
     group.MapDelete("{id}", async (string id, [FromServices] IRepository<Evaluation> repo) =>
     {
-      await repo.DeleteAsync(e => e.Id == id);
+      await repo.DeleteAsync(FilterSpecification<Evaluation>.From(e => e.Id == id));
       return Results.NoContent();
     });
 

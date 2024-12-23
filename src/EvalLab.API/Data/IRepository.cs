@@ -1,11 +1,9 @@
-using System.Linq.Expressions;
-
 namespace EvalLab.API.Data;
 
 interface IRepository<T> where T : Entity
 {
-  Task<Page<T>> GetAsync(int pageNumber, int pageSize);
-  Task<T> GetAsync(Expression<Func<T, bool>> filter);
+  Task<Page<T>> GetAsync(int pageNumber, int pageSize, FilterSpecification<T> spec, SortSpecification<T> sort);
+  Task<T> GetAsync(FilterSpecification<T> spec);
   Task<T> CreateAsync(T entity);
-  Task DeleteAsync(Expression<Func<T, bool>> filter);
+  Task DeleteAsync(FilterSpecification<T> spec);
 }

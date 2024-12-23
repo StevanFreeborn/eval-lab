@@ -23,7 +23,32 @@ static class PipelineEndpoints
       return Results.Created($"/pipelines/{pipeline.Id}", PipelineDto.From(pipeline));
     });
 
-    group.MapPost("{id}/run", (string id) => Results.Ok());
+    group.MapGet(
+      string.Empty,
+      async (
+        [FromServices] IRepository<Pipeline> repo,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 50,
+        [FromQuery] string sortBy = "createdDate",
+        [FromQuery] string sortOrder = "desc",
+        [FromQuery] string? name = null
+      ) =>
+    {
+
+      var spec = FilterSpecification<Pipeline>.All;
+
+      if (name is not null)
+      {
+        spec = spec.And(FilterSpecification<Pipeline>.From(p => p.Name.Contains(name)));
+      }
+
+      var sort = SortSpecification<Pipeline>.From(sortBy, sortOrder);
+
+      var page = await repo.GetAsync(pageNumber, pageSize, spec, sort);
+      return Results.Ok(PageDto<PipelineDto>.FromPage(page, PipelineDto.From));
+    });
+
+    group.MapPost("{id}/run", (string id) => Results.Ok(new { Output = id }));
 
     return app;
   }

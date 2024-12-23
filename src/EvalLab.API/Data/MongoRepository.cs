@@ -10,11 +10,13 @@ abstract class MongoRepository<T>(MongoDbContext context) : IRepository<T> where
   private const string ItemsFacetName = "items";
   private protected readonly IMongoCollection<T> _collection = context.GetCollection<T>();
 
-  public virtual async Task<Page<T>> GetAsync(int pageNumber, int pageSize)
+  public virtual async Task<Page<T>> GetAsync(int pageNumber, int pageSize, FilterSpecification<T> filter, SortSpecification<T> sort)
   {
+    var match = PipelineStageDefinitionBuilder.Match(filter.ToExpression());
+
     var totalFacet = AggregateFacet.Create(
       CountFacetName,
-      PipelineDefinition<T, AggregateCountResult>.Create([PipelineStageDefinitionBuilder.Count<T>()])
+      PipelineDefinition<T, AggregateCountResult>.Create([match, PipelineStageDefinitionBuilder.Count<T>()])
     );
 
 
@@ -22,28 +24,37 @@ abstract class MongoRepository<T>(MongoDbContext context) : IRepository<T> where
       ItemsFacetName,
       PipelineDefinition<T, T>.Create(
         [
+          match,
           PipelineStageDefinitionBuilder.Skip<T>((pageNumber - 1) * pageSize),
           PipelineStageDefinitionBuilder.Limit<T>(pageSize)
         ]
       )
     );
 
-    var aggregation = await _collection.Aggregate()
-      .SortByDescending(e => e.CreatedDate)
+    var aggregation = _collection.Aggregate();
+
+    var sortedAggregation = sort switch
+    {
+      SortBySpecification<T> => aggregation.SortBy(sort.ToExpression()),
+      SortByDescSpecification<T> => aggregation.SortByDescending(sort.ToExpression()),
+      _ => throw new ArgumentException($"{nameof(sort)} is invalid type")
+    };
+
+    var finalAggregation = await sortedAggregation
       .Facet(totalFacet, itemsFacet)
       .FirstOrDefaultAsync();
 
-    var countOutput = aggregation.Facets.First(f => f.Name == CountFacetName).Output<AggregateCountResult>();
+    var countOutput = finalAggregation.Facets.First(f => f.Name == CountFacetName).Output<AggregateCountResult>();
     var totalItems = countOutput.Count is 0 ? 0 : countOutput[0].Count;
     var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
-    var items = aggregation.Facets.First(f => f.Name == ItemsFacetName).Output<T>();
+    var items = finalAggregation.Facets.First(f => f.Name == ItemsFacetName).Output<T>();
 
     return new(pageNumber, pageSize, totalPages, totalItems, items);
   }
 
-  public virtual async Task<T> GetAsync(Expression<Func<T, bool>> filter)
+  public virtual async Task<T> GetAsync(FilterSpecification<T> spec)
   {
-    return await _collection.Find(filter).FirstOrDefaultAsync();
+    return await _collection.Find(spec.ToExpression()).FirstOrDefaultAsync();
   }
 
   public virtual async Task<T> CreateAsync(T entity)
@@ -52,8 +63,8 @@ abstract class MongoRepository<T>(MongoDbContext context) : IRepository<T> where
     return entity;
   }
 
-  public virtual async Task DeleteAsync(Expression<Func<T, bool>> filter)
+  public virtual async Task DeleteAsync(FilterSpecification<T> spec)
   {
-    await _collection.DeleteOneAsync(filter);
+    await _collection.DeleteOneAsync(spec.ToExpression());
   }
 }
