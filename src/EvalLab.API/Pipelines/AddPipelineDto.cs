@@ -18,6 +18,11 @@ record AddPipelineDto(string Name, string Description, string Endpoint)
       results.Add(new ValidationResult("Endpoint is required", [nameof(Endpoint)]));
     }
 
+    if (Uri.TryCreate(Endpoint, UriKind.Absolute, out _) is false)
+    {
+      results.Add(new ValidationResult("Endpoint must be a valid URI", [nameof(Endpoint)]));
+    }
+
     return results.Count is 0;
   }
 

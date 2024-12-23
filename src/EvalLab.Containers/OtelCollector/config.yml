@@ -7,13 +7,13 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
-  tail_sampling/evaluations:
+  tail_sampling/runs:
     decision_wait: 1s
     policies: [
       {
-        name: evaluations,
-        type: boolean_attribute,
-        boolean_attribute: {key: evallab.evaluation.run, value: true}
+        name: runs,
+        type: string_attribute,
+        string_attribute: {key: evallab.run, values: [run-*], enabled_regex_matching: true}
       }
     ]
   batch:
@@ -39,9 +39,9 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [otlp/aspire]
-    traces/evaluations:
+    traces/runs:
       receivers: [otlp]
-      processors: [tail_sampling/evaluations, batch]
+      processors: [tail_sampling/runs, batch]
       exporters: [otlphttp]
     metrics:
       receivers: [otlp]

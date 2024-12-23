@@ -1,3 +1,5 @@
+using System.Net;
+
 using EvalLab.API.Common;
 using EvalLab.API.Data;
 
@@ -48,7 +50,33 @@ static class PipelineEndpoints
       return Results.Ok(PageDto<PipelineDto>.FromPage(page, PipelineDto.From));
     });
 
-    group.MapPost("{id}/run", (string id) => Results.Ok(new { Output = id }));
+    group.MapPost("{id}/run", async (string id, [FromBody] RunRequest dto, [FromServices] IRepository<Pipeline> repo, [FromServices] HttpClient client) =>
+    {
+      if (dto.TryValidate(out var results) is false)
+      {
+        return Results.ValidationProblem(results.ToErrors());
+      }
+
+      var pipeline = await repo.GetAsync(FilterSpecification<Pipeline>.From(p => p.Id == id));
+
+      if (pipeline is null)
+      {
+        return Results.NotFound();
+      }
+
+      var run = await pipeline.RunAsync(client, dto);
+
+      if (run is null)
+      {
+        return Results.Problem(
+          title: "Failed to run pipeline",
+          detail: "An error occurred while running the pipeline",
+          statusCode: (int)HttpStatusCode.InternalServerError
+        );
+      }
+
+      return Results.Ok(RunDto.From(run));
+    });
 
     return app;
   }
