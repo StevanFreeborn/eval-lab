@@ -1,3 +1,4 @@
+using EvalLab.API.Common;
 using EvalLab.API.Data;
 
 namespace EvalLab.API.Pipelines;
@@ -8,23 +9,17 @@ class Pipeline : Entity
   public string Description { get; init; } = string.Empty;
   public string Endpoint { get; init; } = string.Empty;
 
-  // TODO: Null bad...use Result<T> instead
-  public async Task<Run?> RunAsync(HttpClient client, RunRequest request)
+  public async Task<Result<Run>> RunAsync(HttpClient client, RunRequest request)
   {
-    var response = await client.PostAsJsonAsync(Endpoint, request);
-
-    if (response.IsSuccessStatusCode is false)
+    try
     {
-      return null;
+      var response = await client.PostAsJsonAsync(Endpoint, request);
+      var output = await response.Content.ReadFromJsonAsync<RunResponse>();
+      return Result<Run>.Success(new Run(request.Id, request.Input, output?.Output ?? string.Empty));
     }
-
-    var output = await response.Content.ReadFromJsonAsync<RunResponse>();
-
-    if (output is null)
+    catch (Exception ex)
     {
-      return null;
+      return Result<Run>.Failure(ex);
     }
-
-    return new Run(request.Id, request.Input, output.Output);
   }
 }

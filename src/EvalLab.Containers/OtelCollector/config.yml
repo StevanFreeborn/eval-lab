@@ -41,7 +41,7 @@ service:
       exporters: [otlp/aspire]
     traces/runs:
       receivers: [otlp]
-      processors: [tail_sampling/runs, batch]
+      processors: [tail_sampling/runs]
       exporters: [otlphttp]
     metrics:
       receivers: [otlp]

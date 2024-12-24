@@ -64,9 +64,9 @@ static class PipelineEndpoints
         return Results.NotFound();
       }
 
-      var run = await pipeline.RunAsync(client, dto);
+      var runResult = await pipeline.RunAsync(client, dto);
 
-      if (run is null)
+      if (runResult.Failed)
       {
         return Results.Problem(
           title: "Failed to run pipeline",
@@ -75,7 +75,7 @@ static class PipelineEndpoints
         );
       }
 
-      return Results.Ok(RunDto.From(run));
+      return Results.Ok(RunDto.From(runResult.Value));
     });
 
     return app;

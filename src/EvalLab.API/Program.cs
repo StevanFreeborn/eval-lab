@@ -6,6 +6,7 @@ using EvalLab.API.Data;
 using EvalLab.API.Demo;
 using EvalLab.API.Evaluations;
 using EvalLab.API.Pipelines;
+using EvalLab.API.Traces;
 using EvalLab.ServiceDefaults;
 
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,7 @@ builder.AddMongoDBClient("mongodb");
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<IRepository<Pipeline>, MongoPipelineRepository>();
 builder.Services.AddScoped<IRepository<Evaluation>, MongoEvaluationRepository>();
+builder.Services.AddScoped<IRepository<Trace>, MongoTraceRepository>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IAnthropicApiClient>(sp =>
@@ -64,10 +66,20 @@ app.MapDefaultEndpoints();
 
 app.MapEvaluationEndpoints();
 
-app.MapPost("/v1/traces", ([FromBody] JsonElement traceData) =>
+app.MapPost("/v1/traces", async ([FromBody] JsonElement data, [FromServices] IRepository<Trace> repo) =>
 {
-  var jsonText = traceData.GetRawText();
-  var trace = TracesData.Parser.ParseJson(jsonText);
+  var jsonText = data.GetRawText();
+  var traceData = TracesData.Parser.ParseJson(jsonText);
+  var trace = traceData.ToTrace();
+  var existingTrace = await repo.GetAsync(FilterSpecification<Trace>.From(t => t.RunId == trace.RunId));
+
+  if (existingTrace is not null)
+  {
+    return Results.Conflict("Trace already created for this run");
+  }
+
+  await repo.CreateAsync(trace);
+
   return Results.Ok();
 });
 
