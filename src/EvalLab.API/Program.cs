@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 using AnthropicClient;
 
 using EvalLab.API.Data;
@@ -8,10 +6,6 @@ using EvalLab.API.Evaluations;
 using EvalLab.API.Pipelines;
 using EvalLab.API.Traces;
 using EvalLab.ServiceDefaults;
-
-using Microsoft.AspNetCore.Mvc;
-
-using OpenTelemetry.Proto.Trace.V1;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,22 +60,7 @@ app.MapDefaultEndpoints();
 
 app.MapEvaluationEndpoints();
 
-app.MapPost("/v1/traces", async ([FromBody] JsonElement data, [FromServices] IRepository<Trace> repo) =>
-{
-  var jsonText = data.GetRawText();
-  var traceData = TracesData.Parser.ParseJson(jsonText);
-  var trace = traceData.ToTrace();
-  var existingTrace = await repo.GetAsync(FilterSpecification<Trace>.From(t => t.RunId == trace.RunId));
-
-  if (existingTrace is not null)
-  {
-    return Results.Conflict("Trace already created for this run");
-  }
-
-  await repo.CreateAsync(trace);
-
-  return Results.Ok();
-});
+app.MapTraceEndpoints();
 
 app.MapPipelineEndpoints();
 

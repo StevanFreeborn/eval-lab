@@ -1,18 +1,23 @@
 <script setup lang="ts">
   import { defineProps } from 'vue';
+  import { Run } from '../../services/pipelineService';
+  import TraceViewer from '../TraceViewer.vue';
 
-  defineProps<{ content: string }>();
+  defineProps<{ run: Run | null }>();
 </script>
 
 <template>
   <div class="tab-content">
     <p
-      v-if="!content"
+      v-if="!run"
       class="placeholder"
     >
       Waiting for trace information.
     </p>
-    <p v-else>{{ content }}</p>
+    <TraceViewer
+      v-else
+      :run-id="run.id"
+    />
   </div>
 </template>
 

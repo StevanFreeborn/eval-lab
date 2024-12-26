@@ -29,6 +29,7 @@ export type Entity = {
 export type GenericService<NewT, T extends Entity> = {
   create(item: NewT): Promise<Result<T>>;
   getAll(): Promise<Result<Page<T>>>;
+  get(id: string): Promise<Result<T>>;
   delete(id: string): Promise<Result<true>>;
 };
 
@@ -80,6 +81,16 @@ export function createGenericService<NewT, T extends Entity>(
         ...response.value,
         items: response.value.items.map(mapFn),
       });
+    },
+
+    async get(id: string): Promise<Result<T>> {
+      const response = await makeRequest<T>(`${baseUrl}/${id}`, { method: 'GET' });
+
+      if (response.failed) {
+        return response;
+      }
+
+      return result.success(mapFn(response.value));
     },
 
     async delete(id: string): Promise<Result<true>> {

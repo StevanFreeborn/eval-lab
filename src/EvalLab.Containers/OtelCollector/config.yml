@@ -8,7 +8,7 @@ receivers:
 
 processors:
   tail_sampling/runs:
-    decision_wait: 1s
+    decision_wait: 0s
     policies: [
       {
         name: runs,
@@ -17,6 +17,8 @@ processors:
       }
     ]
   batch:
+  batch/runs:
+    send_batch_size: 0
 
 exporters:
   debug:
@@ -41,7 +43,7 @@ service:
       exporters: [otlp/aspire]
     traces/runs:
       receivers: [otlp]
-      processors: [tail_sampling/runs]
+      processors: [tail_sampling/runs, batch/runs]
       exporters: [otlphttp]
     metrics:
       receivers: [otlp]

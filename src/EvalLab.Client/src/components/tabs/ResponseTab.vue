@@ -1,18 +1,19 @@
 <script setup lang="ts">
   import { defineProps } from 'vue';
+  import { Run } from '../../services/pipelineService';
 
-  defineProps<{ content: string }>();
+  defineProps<{ run: Run | null }>();
 </script>
 
 <template>
   <div class="tab-content">
     <p
-      v-if="!content"
+      v-if="!run"
       class="placeholder"
     >
       Run input to get response from pipeline
     </p>
-    <p v-else>{{ content }}</p>
+    <p v-else>{{ run.output }}</p>
   </div>
 </template>
 

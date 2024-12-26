@@ -16,8 +16,15 @@ type NewPipeline = {
 
 export type Pipeline = NewPipeline & Entity;
 
+export type Run = {
+  id: string;
+  input: string;
+  output: string;
+  createdDate: Date;
+};
+
 type PipelinesService = GenericService<NewPipeline, Pipeline> & {
-  run(id: string, input: string): Promise<Result<{ output: string }>>;
+  run(id: string, input: string): Promise<Result<Run>>;
 };
 
 type PipelinesServiceKeyType = InjectionKey<PipelinesService>;
@@ -29,7 +36,7 @@ const BASE_URL = '/api/pipelines';
 export const pipelinesService: PipelinesService = Object.freeze({
   ...createGenericService(BASE_URL, createPipeline),
   run: async function (id: string, input: string) {
-    const response = await makeRequest<{ output: string }>(`${BASE_URL}/${id}/run`, {
+    const response = await makeRequest<Run>(`${BASE_URL}/${id}/run`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ input }),

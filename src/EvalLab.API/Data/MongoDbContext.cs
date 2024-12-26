@@ -4,8 +4,6 @@ using EvalLab.API.Traces;
 
 using MongoDB.Driver;
 
-using OpenTelemetry.Proto.Trace.V1;
-
 namespace EvalLab.API.Data;
 
 class MongoDbContext

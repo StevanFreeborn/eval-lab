@@ -6,12 +6,12 @@
   import TraceTab from '../components/tabs/TraceTab.vue';
   import WaitingSpinner from '../components/WaitingSpinner.vue';
   import { useService } from '../composables/useService.ts';
-  import { PipelinesServiceKey } from '../services/pipelineService.ts';
+  import { PipelinesServiceKey, Run } from '../services/pipelineService.ts';
 
   const selectedPipeline = ref<Option>({ id: '', name: '' });
   const input = ref('');
   const isRunning = ref(false);
-  const response = ref('');
+  const run = ref<Run | null>(null);
 
   const pipelinesService = useService(PipelinesServiceKey);
 
@@ -38,7 +38,7 @@
         return;
       }
 
-      response.value = result.value.output;
+      run.value = result.value;
     } finally {
       isRunning.value = false;
     }
@@ -163,7 +163,7 @@
         <component
           :is="tab.component"
           v-bind="{
-            content: response,
+            run: run,
           }"
         />
       </div>
