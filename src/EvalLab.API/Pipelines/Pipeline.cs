@@ -16,7 +16,13 @@ class Pipeline : Entity
     {
       var response = await client.PostAsJsonAsync(Endpoint, request);
       var output = await response.Content.ReadFromJsonAsync<RunResponse>();
-      return Result<Run>.Success(new Run(request.Id, request.Input, output?.Output ?? string.Empty));
+      return Result<Run>.Success(new Run()
+      {
+        PipelineId = request.PipelineId,
+        Id = request.Id,
+        Input = request.Input,
+        Output = output?.Output ?? string.Empty
+      });
     }
     catch (Exception ex)
     {

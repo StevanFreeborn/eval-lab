@@ -6,7 +6,8 @@
   import TraceTab from '../components/tabs/TraceTab.vue';
   import WaitingSpinner from '../components/WaitingSpinner.vue';
   import { useService } from '../composables/useService.ts';
-  import { PipelinesServiceKey, Run } from '../services/pipelineService.ts';
+  import { PipelinesServiceKey } from '../services/pipelineService.ts';
+  import { Run, RunsServiceKey } from '../services/runService.ts';
 
   const selectedPipeline = ref<Option>({ id: '', name: '' });
   const input = ref('');
@@ -14,6 +15,7 @@
   const run = ref<Run | null>(null);
 
   const pipelinesService = useService(PipelinesServiceKey);
+  const runsService = useService(RunsServiceKey);
 
   async function handleSubmit() {
     if (!selectedPipeline.value.id) {
@@ -29,7 +31,10 @@
     isRunning.value = true;
 
     try {
-      const result = await pipelinesService.run(selectedPipeline.value.id, input.value);
+      const result = await runsService.create({
+        pipelineId: selectedPipeline.value.id,
+        input: input.value,
+      });
 
       if (result.failed) {
         console.error(result.error.message);

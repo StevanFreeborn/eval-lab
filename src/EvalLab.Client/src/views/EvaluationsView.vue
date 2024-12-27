@@ -23,7 +23,7 @@
     }, 500);
 
     try {
-      const getEvaluationsResult = await evaluationsService.getAll(pageNumber, pageSize);
+      const getEvaluationsResult = await evaluationsService.getAll({ pageNumber, pageSize });
 
       if (getEvaluationsResult.failed) {
         console.error(getEvaluationsResult.error.message);

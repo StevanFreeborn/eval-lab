@@ -10,7 +10,7 @@ record PipelineDto(
 )
 {
   private PipelineDto(Pipeline pipeline) : this(
-    pipeline.Id.ToString(),
+    pipeline.Id,
     pipeline.Name,
     pipeline.Description,
     pipeline.Endpoint,
@@ -20,28 +20,4 @@ record PipelineDto(
   { }
 
   public static PipelineDto From(Pipeline pipeline) => new(pipeline);
-}
-
-record PipelineWithRunsDto(
-  string Id,
-  string Name,
-  string Description,
-  string Endpoint,
-  DateTime CreatedDate,
-  DateTime UpdatedDate,
-  List<RunDto> Runs
-)
-{
-  private PipelineWithRunsDto(Pipeline pipeline) : this(
-    pipeline.Id.ToString(),
-    pipeline.Name,
-    pipeline.Description,
-    pipeline.Endpoint,
-    pipeline.CreatedDate,
-    pipeline.UpdatedDate,
-    [.. pipeline.Runs.Select(RunDto.From)]
-  )
-  { }
-
-  public static PipelineWithRunsDto From(Pipeline pipeline) => new(pipeline);
 }

@@ -2,7 +2,8 @@
   import { onMounted, ref } from 'vue';
   import { useRoute } from 'vue-router';
   import { useService } from '../composables/useService.ts';
-  import { PipelinesServiceKey, PipelineWithRuns } from '../services/pipelineService.ts';
+  import { Pipeline, PipelinesServiceKey } from '../services/pipelineService.ts';
+  import { Run, RunsServiceKey } from '../services/runService.ts';
 
   // TODO: Runs will be queried separately and will be paginated
   // TODO: Add actions for each run: trace view and delete
@@ -10,59 +11,71 @@
 
   const route = useRoute();
   const pipelineId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
-  const data = ref<PipelineWithRuns>();
+  const pipeline = ref<Pipeline>();
+  const runs = ref<Run[]>([]);
 
-  const pipelineService = useService(PipelinesServiceKey);
+  const pipelinesService = useService(PipelinesServiceKey);
+  const runsService = useService(RunsServiceKey);
 
   onMounted(async () => {
-    const result = await pipelineService.get(pipelineId);
+    const getPipelineResult = await pipelinesService.get(pipelineId);
 
-    if (result.failed) {
-      console.error(result.error.message);
+    if (getPipelineResult.failed) {
+      console.error(getPipelineResult.error.message);
       return;
     }
 
-    data.value = result.value;
-    console.log(data.value.runs);
+    pipeline.value = getPipelineResult.value;
+  });
+
+  onMounted(async () => {
+    const getRunsResult = await runsService.getAll({ additionalParams: { pipelineId } });
+
+    if (getRunsResult.failed) {
+      console.error(getRunsResult.error.message);
+      return;
+    }
+
+    runs.value = getRunsResult.value.items;
   });
 </script>
 
 <template>
   <div class="container">
-    <div v-if="!data">Loading...</div>
+    <div v-if="!pipeline">Loading...</div>
     <div
       v-else
       class="content"
     >
       <div class="header">
-        <h1>{{ data.name }}</h1>
-        <p class="description">{{ data.description }}</p>
+        <h1>{{ pipeline.name }}</h1>
+        <p class="description">{{ pipeline.description }}</p>
       </div>
 
       <div class="details-grid">
         <div class="detail-item">
           <label>ID</label>
-          <p class="monospace">{{ data.id }}</p>
+          <p class="monospace">{{ pipeline.id }}</p>
         </div>
         <div class="detail-item">
           <label>Endpoint</label>
-          <p class="monospace">{{ data.endpoint }}</p>
+          <p class="monospace">{{ pipeline.endpoint }}</p>
         </div>
         <div class="detail-item">
           <label>Created Date</label>
-          <p>{{ data.createdDate.toLocaleString() }}</p>
+          <p>{{ pipeline.createdDate.toLocaleString() }}</p>
         </div>
         <div class="detail-item">
           <label>Updated Date</label>
-          <p>{{ data.updatedDate.toLocaleString() }}</p>
+          <p>{{ pipeline.updatedDate.toLocaleString() }}</p>
         </div>
       </div>
 
       <div class="runs-section">
-        <h2>Runs ({{ data.runs.length }})</h2>
+        <h2>Runs ({{ runs.length }})</h2>
         <div class="runs-list">
           <div
-            v-for="run in data.runs"
+            v-for="run in runs"
             :key="run.id"
             class="run-item"
           >

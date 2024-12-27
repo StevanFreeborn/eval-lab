@@ -1,8 +1,14 @@
+using EvalLab.API.Data;
+
 namespace EvalLab.API.Pipelines;
 
-record Run(string Id, string Input, string Output)
+class Run : Entity
 {
   public const string RunAttribute = "evallab.run";
   public const string RunIdPrefix = "run-";
-  public DateTime CreatedDate { get; init; } = DateTime.UtcNow;
+
+  public string PipelineId { get; init; } = string.Empty;
+  public string Name => $"Run {Id}";
+  public string Input { get; init; } = string.Empty;
+  public string Output { get; init; } = string.Empty;
 }

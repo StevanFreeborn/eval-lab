@@ -19,6 +19,7 @@ builder.AddMongoDBClient("mongodb");
 
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<IRepository<Pipeline>, MongoPipelineRepository>();
+builder.Services.AddScoped<IRepository<Run>, MongoRunRepository>();
 builder.Services.AddScoped<IRepository<Evaluation>, MongoEvaluationRepository>();
 builder.Services.AddScoped<IRepository<Trace>, MongoTraceRepository>();
 
@@ -63,6 +64,8 @@ app.MapEvaluationEndpoints();
 app.MapTraceEndpoints();
 
 app.MapPipelineEndpoints();
+
+app.MapRunEndpoints();
 
 app.MapDemoEndpoints();
 

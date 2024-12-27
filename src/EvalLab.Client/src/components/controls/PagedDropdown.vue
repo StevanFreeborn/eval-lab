@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="T">
   import { computed, defineModel, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue';
-  import { Page, Result } from '../../services/shared.ts';
+  import { GetAllParams, Page, Result } from '../../services/shared.ts';
   import { createDebouncedHandler } from '../../shared/utils';
   import WaitingSpinner from '../WaitingSpinner.vue';
 
@@ -12,13 +12,7 @@
   const selectedOption = defineModel<Option>();
 
   type Props = {
-    getOptions: (
-      pageNumber?: number,
-      pageSize?: number,
-      sortBy?: string,
-      sortOrder?: 'asc' | 'desc',
-      nameFilter?: string,
-    ) => Promise<Result<Page<T>>>;
+    getOptions: (params: GetAllParams) => Promise<Result<Page<T>>>;
     mapOption: (item: T) => Option;
     placeholder: string;
     searchPlaceholder: string;
@@ -55,13 +49,13 @@
     try {
       const page = currentPage.value ? currentPage.value.pageNumber : 0;
       const nextPage = page + 1;
-      const result = await props.getOptions(
-        nextPage,
-        props.pageSize,
-        props.sortBy?.toString(),
-        props.sortOrder,
-        nameFilter.value,
-      );
+      const result = await props.getOptions({
+        pageNumber: nextPage,
+        pageSize: props.pageSize,
+        sortBy: props.sortBy?.toString(),
+        sortOrder: props.sortOrder,
+        additionalParams: { name: nameFilter.value },
+      });
 
       if (result.failed) {
         console.error(result.error.message);

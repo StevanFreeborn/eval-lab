@@ -23,7 +23,7 @@
     }, 500);
 
     try {
-      const getPipelinesResult = await pipelinesService.getAll(pageNumber, pageSize);
+      const getPipelinesResult = await pipelinesService.getAll({ pageNumber, pageSize });
 
       if (getPipelinesResult.failed) {
         console.error(getPipelinesResult.error.message);

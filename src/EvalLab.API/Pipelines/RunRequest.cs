@@ -2,13 +2,18 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EvalLab.API.Pipelines;
 
-record RunRequest(string Input)
+record RunRequest(string PipelineId, string Input)
 {
   public string Id { get; init; } = Guid.NewGuid().ToString();
 
   public bool TryValidate(out List<ValidationResult> results)
   {
     results = [];
+
+    if (string.IsNullOrWhiteSpace(PipelineId))
+    {
+      results.Add(new ValidationResult("PipelineId is required", [nameof(PipelineId)]));
+    }
 
     if (string.IsNullOrWhiteSpace(Input))
     {

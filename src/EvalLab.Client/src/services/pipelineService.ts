@@ -1,12 +1,5 @@
 import { InjectionKey } from 'vue';
-import {
-  createGenericService,
-  Entity,
-  GenericService,
-  makeRequest,
-  result,
-  Result,
-} from './shared';
+import { createGenericService, Entity, GenericService } from './shared';
 
 type NewPipeline = {
   name: string;
@@ -16,20 +9,7 @@ type NewPipeline = {
 
 export type Pipeline = NewPipeline & Entity;
 
-export type PipelineWithRuns = Pipeline & {
-  runs: Run[];
-};
-
-export type Run = {
-  id: string;
-  input: string;
-  output: string;
-  createdDate: Date;
-};
-
-type PipelinesService = GenericService<NewPipeline, Pipeline, PipelineWithRuns> & {
-  run(id: string, input: string): Promise<Result<Run>>;
-};
+type PipelinesService = GenericService<NewPipeline, Pipeline>;
 
 type PipelinesServiceKeyType = InjectionKey<PipelinesService>;
 
@@ -37,22 +17,9 @@ export const PipelinesServiceKey: PipelinesServiceKeyType = Symbol('PipelinesSer
 
 const BASE_URL = '/api/pipelines';
 
-export const pipelinesService: PipelinesService = Object.freeze({
-  ...createGenericService(BASE_URL, createPipeline, createPipelineWithRuns),
-  run: async function (id: string, input: string) {
-    const response = await makeRequest<Run>(`${BASE_URL}/${id}/run`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input }),
-    });
-
-    if (response.failed) {
-      return response;
-    }
-
-    return result.success(response.value);
-  },
-});
+export const pipelinesService: PipelinesService = Object.freeze(
+  createGenericService(BASE_URL, createPipeline),
+);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createPipeline(data: any): Pipeline {
@@ -63,23 +30,5 @@ function createPipeline(data: any): Pipeline {
     description: data.description,
     createdDate: new Date(data.createdDate),
     updatedDate: new Date(data.updatedDate),
-  };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createPipelineWithRuns(data: any): PipelineWithRuns {
-  return {
-    ...createPipeline(data),
-    runs: data.runs.map(createRun),
-  };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createRun(data: any): Run {
-  return {
-    id: data.id,
-    input: data.input,
-    output: data.output,
-    createdDate: new Date(data.createdDate),
   };
 }

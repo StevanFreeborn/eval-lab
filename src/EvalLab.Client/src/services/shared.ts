@@ -26,24 +26,25 @@ export type Entity = {
   updatedDate: Date;
 };
 
-export type GenericService<NewT, T extends Entity, K extends Entity> = {
+export type GetAllParams = {
+  pageNumber?: number;
+  pageSize?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  additionalParams?: Record<string, string>;
+};
+
+export type GenericService<NewT, T extends Entity> = {
   create(item: NewT): Promise<Result<T>>;
-  getAll(
-    pageNumber?: number,
-    pageSize?: number,
-    sortBy?: string,
-    sortOrder?: 'asc' | 'desc',
-    name?: string,
-  ): Promise<Result<Page<T>>>;
-  get(id: string): Promise<Result<K>>;
+  getAll(params: GetAllParams): Promise<Result<Page<T>>>;
+  get(id: string): Promise<Result<T>>;
   delete(id: string): Promise<Result<true>>;
 };
 
-export function createGenericService<NewT, T extends Entity, K extends Entity>(
+export function createGenericService<NewT, T extends Entity>(
   baseUrl: string,
-  mapTFn: (data: unknown) => T,
-  mapKFn: (data: unknown) => K,
-): GenericService<NewT, T, K> {
+  mapFn: (data: unknown) => T,
+): GenericService<NewT, T> {
   return {
     async create(item: NewT): Promise<Result<T>> {
       const response = await makeRequest<T>(baseUrl, {
@@ -56,27 +57,27 @@ export function createGenericService<NewT, T extends Entity, K extends Entity>(
         return response;
       }
 
-      return result.success(mapTFn(response.value));
+      return result.success(mapFn(response.value));
     },
 
-    async getAll(
-      pageNumber: number = 1,
-      pageSize: number = 50,
-      sortBy: string = 'createdDate',
-      sortOrder: 'asc' | 'desc' = 'desc',
-      name: string = '',
-    ): Promise<Result<Page<T>>> {
+    async getAll({
+      pageNumber = 1,
+      pageSize = 50,
+      sortBy = 'createdDate',
+      sortOrder = 'desc',
+      additionalParams = {},
+    }: GetAllParams): Promise<Result<Page<T>>> {
       const searchParams = new URLSearchParams();
       searchParams.append('pageNumber', pageNumber.toString());
       searchParams.append('pageSize', pageSize.toString());
       searchParams.append('sortBy', sortBy);
       searchParams.append('sortOrder', sortOrder);
 
-      if (!name) {
-        searchParams.append('name', name);
+      for (const key in additionalParams) {
+        searchParams.append(key, additionalParams[key]);
       }
 
-      const response = await makeRequest<Page<K>>(`${baseUrl}?${searchParams.toString()}`, {
+      const response = await makeRequest<Page<T>>(`${baseUrl}?${searchParams.toString()}`, {
         method: 'GET',
       });
 
@@ -86,18 +87,18 @@ export function createGenericService<NewT, T extends Entity, K extends Entity>(
 
       return result.success({
         ...response.value,
-        items: response.value.items.map(mapTFn),
+        items: response.value.items.map(mapFn),
       });
     },
 
-    async get(id: string): Promise<Result<K>> {
-      const response = await makeRequest<K>(`${baseUrl}/${id}`, { method: 'GET' });
+    async get(id: string): Promise<Result<T>> {
+      const response = await makeRequest<T>(`${baseUrl}/${id}`, { method: 'GET' });
 
       if (response.failed) {
         return response;
       }
 
-      return result.success(mapKFn(response.value));
+      return result.success(mapFn(response.value));
     },
 
     async delete(id: string): Promise<Result<true>> {

@@ -3,12 +3,14 @@ import { evaluationsService, EvaluationsServiceKey } from '../src/services/evalu
 import App from './App.vue';
 import { router } from './router';
 import { pipelinesService, PipelinesServiceKey } from './services/pipelineService';
+import { runsService, RunsServiceKey } from './services/runService';
 import { tracesService, TracesServiceKey } from './services/traceService';
 import './style.css';
 
 createApp(App)
   .provide(EvaluationsServiceKey, evaluationsService)
   .provide(PipelinesServiceKey, pipelinesService)
+  .provide(RunsServiceKey, runsService)
   .provide(TracesServiceKey, tracesService)
   .use(router)
   .mount('#app');

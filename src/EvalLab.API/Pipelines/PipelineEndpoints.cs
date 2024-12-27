@@ -1,5 +1,3 @@
-using System.Net;
-
 using EvalLab.API.Common;
 using EvalLab.API.Data;
 
@@ -53,42 +51,7 @@ static class PipelineEndpoints
     group.MapGet("{id}", async (string id, [FromServices] IRepository<Pipeline> repo) =>
     {
       var pipeline = await repo.GetAsync(FilterSpecification<Pipeline>.From(p => p.Id == id));
-      return pipeline is not null ? Results.Ok(PipelineWithRunsDto.From(pipeline)) : Results.NotFound();
-    });
-
-    group.MapPost("{id}/run", async (string id, [FromBody] RunRequest dto, [FromServices] IRepository<Pipeline> repo, [FromServices] HttpClient client) =>
-    {
-      if (dto.TryValidate(out var results) is false)
-      {
-        return Results.ValidationProblem(results.ToErrors());
-      }
-
-      var pipeline = await repo.GetAsync(FilterSpecification<Pipeline>.From(p => p.Id == id));
-
-      if (pipeline is null)
-      {
-        return Results.NotFound();
-      }
-
-      // TODO: Runs should be a separate collection
-      // they will be a lot of them. We will always
-      // view them in the context of a pipeline
-      // but we will want to query them separately
-      // to support pagination and filtering etc.
-      var runResult = await pipeline.RunAsync(client, dto);
-      pipeline.Runs.Add(runResult.Value);
-      await repo.UpdateAsync(FilterSpecification<Pipeline>.From(p => p.Id == id), pipeline);
-
-      if (runResult.Failed)
-      {
-        return Results.Problem(
-          title: "Failed to run pipeline",
-          detail: "An error occurred while running the pipeline",
-          statusCode: (int)HttpStatusCode.InternalServerError
-        );
-      }
-
-      return Results.Ok(RunDto.From(runResult.Value));
+      return pipeline is not null ? Results.Ok(PipelineDto.From(pipeline)) : Results.NotFound();
     });
 
     group.MapDelete("{id}", async (string id, [FromServices] IRepository<Pipeline> repo) =>
