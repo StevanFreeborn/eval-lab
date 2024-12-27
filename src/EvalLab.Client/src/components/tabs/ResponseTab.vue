@@ -11,7 +11,7 @@
       v-if="!run"
       class="placeholder"
     >
-      Run input to get response from pipeline
+      Run input to get response from pipeline.
     </p>
     <p v-else>{{ run.output }}</p>
   </div>
