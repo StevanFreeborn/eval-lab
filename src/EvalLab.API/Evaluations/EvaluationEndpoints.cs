@@ -43,8 +43,8 @@ static class EvaluationEndpoints
 
     group.MapDelete("{id}", async (string id, [FromServices] IRepository<Evaluation> repo) =>
     {
-      await repo.DeleteAsync(FilterSpecification<Evaluation>.From(e => e.Id == id));
-      return Results.NoContent();
+      var isDeleted = await repo.DeleteAsync(FilterSpecification<Evaluation>.From(e => e.Id == id));
+      return isDeleted ? Results.NoContent() : Results.NotFound();
     });
 
     return app;

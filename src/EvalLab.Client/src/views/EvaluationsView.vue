@@ -13,7 +13,7 @@
 
   const addForm = useTemplateRef<AddEvaluationFormComponent>('addForm');
 
-  const data = ref<TableData<Evaluation>>({ status: 'loading' });
+  const data = ref<TableData<Evaluation>>({ status: 'initial' });
 
   const evaluationsService = useService(EvaluationsServiceKey);
 
@@ -112,7 +112,7 @@
     <PagedTable
       :data="data"
       :get-item-key="evaluation => evaluation.id"
-      :build-edit-link="evaluation => `/evaluations/${evaluation.id}/edit`"
+      :build-edit-link="evaluation => `/evaluations/${evaluation.id}`"
       :delete-item-handler="evaluation => deleteEvaluation(evaluation.id)"
       @previous-page="handlePreviousPage"
       @goto-page="handleGotoPage"

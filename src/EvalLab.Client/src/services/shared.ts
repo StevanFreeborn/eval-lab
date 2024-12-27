@@ -26,7 +26,7 @@ export type Entity = {
   updatedDate: Date;
 };
 
-export type GenericService<NewT, T extends Entity> = {
+export type GenericService<NewT, T extends Entity, K extends Entity> = {
   create(item: NewT): Promise<Result<T>>;
   getAll(
     pageNumber?: number,
@@ -35,14 +35,15 @@ export type GenericService<NewT, T extends Entity> = {
     sortOrder?: 'asc' | 'desc',
     name?: string,
   ): Promise<Result<Page<T>>>;
-  get(id: string): Promise<Result<T>>;
+  get(id: string): Promise<Result<K>>;
   delete(id: string): Promise<Result<true>>;
 };
 
-export function createGenericService<NewT, T extends Entity>(
+export function createGenericService<NewT, T extends Entity, K extends Entity>(
   baseUrl: string,
-  mapFn: (data: unknown) => T,
-): GenericService<NewT, T> {
+  mapTFn: (data: unknown) => T,
+  mapKFn: (data: unknown) => K,
+): GenericService<NewT, T, K> {
   return {
     async create(item: NewT): Promise<Result<T>> {
       const response = await makeRequest<T>(baseUrl, {
@@ -55,7 +56,7 @@ export function createGenericService<NewT, T extends Entity>(
         return response;
       }
 
-      return result.success(mapFn(response.value));
+      return result.success(mapTFn(response.value));
     },
 
     async getAll(
@@ -75,7 +76,7 @@ export function createGenericService<NewT, T extends Entity>(
         searchParams.append('name', name);
       }
 
-      const response = await makeRequest<Page<T>>(`${baseUrl}?${searchParams.toString()}`, {
+      const response = await makeRequest<Page<K>>(`${baseUrl}?${searchParams.toString()}`, {
         method: 'GET',
       });
 
@@ -85,18 +86,18 @@ export function createGenericService<NewT, T extends Entity>(
 
       return result.success({
         ...response.value,
-        items: response.value.items.map(mapFn),
+        items: response.value.items.map(mapTFn),
       });
     },
 
-    async get(id: string): Promise<Result<T>> {
-      const response = await makeRequest<T>(`${baseUrl}/${id}`, { method: 'GET' });
+    async get(id: string): Promise<Result<K>> {
+      const response = await makeRequest<K>(`${baseUrl}/${id}`, { method: 'GET' });
 
       if (response.failed) {
         return response;
       }
 
-      return result.success(mapFn(response.value));
+      return result.success(mapKFn(response.value));
     },
 
     async delete(id: string): Promise<Result<true>> {

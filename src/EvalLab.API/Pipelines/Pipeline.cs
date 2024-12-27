@@ -8,6 +8,7 @@ class Pipeline : Entity
   public string Name { get; init; } = string.Empty;
   public string Description { get; init; } = string.Empty;
   public string Endpoint { get; init; } = string.Empty;
+  public List<Run> Runs { get; init; } = [];
 
   public async Task<Result<Run>> RunAsync(HttpClient client, RunRequest request)
   {

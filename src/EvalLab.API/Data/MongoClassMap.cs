@@ -33,6 +33,12 @@ static class MongoClassMap
       cm.SetIgnoreExtraElements(true);
     });
 
+    BsonClassMap.TryRegisterClassMap<Run>(cm =>
+    {
+      cm.AutoMap();
+      cm.SetIgnoreExtraElements(true);
+    });
+
     BsonClassMap.TryRegisterClassMap<Trace>(cm =>
     {
       cm.AutoMap();

@@ -16,8 +16,16 @@ export const router = createRouter({
           component: () => import('./views/EvaluationsView.vue'),
         },
         {
+          path: 'evaluations/:id',
+          component: () => import('./views/EvaluationView.vue'),
+        },
+        {
           path: 'pipelines',
           component: () => import('./views/PipelinesView.vue'),
+        },
+        {
+          path: 'pipelines/:id',
+          component: () => import('./views/PipelineView.vue'),
         },
       ],
     },

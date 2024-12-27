@@ -9,7 +9,9 @@ record TraceDto(
 )
 {
   public string Name => $"Run {RunId}";
-  public ulong Duration => Spans.Aggregate(0UL, (acc, span) => acc + span.Duration);
+  public ulong Duration => GetDuration();
+  public ulong Start => Spans.Min(span => span.Start);
+  public ulong End => Spans.Max(span => span.End);
   public static TraceDto From(Trace trace) => new(
     trace.Id,
     trace.RunId,
@@ -17,6 +19,16 @@ record TraceDto(
     trace.CreatedDate,
     trace.UpdatedDate
   );
+
+  private ulong GetDuration()
+  {
+    if (Spans.Count == 0)
+    {
+      return 0;
+    }
+
+    return End - Start;
+  }
 }
 
 record SpanDto(string ParentId, string Id, string Name, ulong Start, ulong End, Dictionary<string, string> Attributes)

@@ -50,6 +50,12 @@ static class PipelineEndpoints
       return Results.Ok(PageDto<PipelineDto>.FromPage(page, PipelineDto.From));
     });
 
+    group.MapGet("{id}", async (string id, [FromServices] IRepository<Pipeline> repo) =>
+    {
+      var pipeline = await repo.GetAsync(FilterSpecification<Pipeline>.From(p => p.Id == id));
+      return pipeline is not null ? Results.Ok(PipelineWithRunsDto.From(pipeline)) : Results.NotFound();
+    });
+
     group.MapPost("{id}/run", async (string id, [FromBody] RunRequest dto, [FromServices] IRepository<Pipeline> repo, [FromServices] HttpClient client) =>
     {
       if (dto.TryValidate(out var results) is false)
@@ -64,7 +70,14 @@ static class PipelineEndpoints
         return Results.NotFound();
       }
 
+      // TODO: Runs should be a separate collection
+      // they will be a lot of them. We will always
+      // view them in the context of a pipeline
+      // but we will want to query them separately
+      // to support pagination and filtering etc.
       var runResult = await pipeline.RunAsync(client, dto);
+      pipeline.Runs.Add(runResult.Value);
+      await repo.UpdateAsync(FilterSpecification<Pipeline>.From(p => p.Id == id), pipeline);
 
       if (runResult.Failed)
       {
@@ -76,6 +89,12 @@ static class PipelineEndpoints
       }
 
       return Results.Ok(RunDto.From(runResult.Value));
+    });
+
+    group.MapDelete("{id}", async (string id, [FromServices] IRepository<Pipeline> repo) =>
+    {
+      var isDeleted = await repo.DeleteAsync(FilterSpecification<Pipeline>.From(p => p.Id == id));
+      return isDeleted ? Results.NoContent() : Results.NotFound();
     });
 
     return app;

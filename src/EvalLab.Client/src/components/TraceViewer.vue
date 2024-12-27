@@ -29,7 +29,7 @@
 
   watch(() => props.runId, getTrace);
 
-  function processSpans(spans: Span[]) {
+  function processSpans(trace: Trace, spans: Span[]) {
     const depthMap = new Map<string, number>();
     const rootSpans = spans.filter(span => !span.parentId);
     rootSpans.forEach(span => depthMap.set(span.id, 0));
@@ -57,15 +57,11 @@
       return depth;
     }
 
-    const traceStart = Math.min(...spans.map(span => span.start));
-    const traceEnd = Math.max(...spans.map(span => span.end));
-    const traceDuration = traceEnd - traceStart;
-
     return spans.map(span => ({
       ...span,
       depth: calculateDepth(span),
-      startPercent: ((span.start - traceStart) / traceDuration) * 100,
-      widthPercent: (span.duration / traceDuration) * 100,
+      startPercent: ((span.start - trace.start) / trace.duration) * 100,
+      widthPercent: (span.duration / trace.duration) * 100,
     }));
   }
 
@@ -76,7 +72,7 @@
 
     const spans = trace.value.spans;
     const sortedSpans = [...spans].sort((a, b) => a.start - b.start);
-    return processSpans(sortedSpans);
+    return processSpans(trace.value, sortedSpans);
   });
 
   function formatDuration(duration: number) {
@@ -98,7 +94,10 @@
     <p>No trace data available. Waiting...</p>
   </div>
   <div v-else>
-    <div class="trace-header">
+    <div
+      class="trace-header"
+      style=""
+    >
       <div class="trace-info">
         <span class="trace-name">{{ trace.name }}</span>
         <span class="trace-timestamp">{{ trace.createdDate.toLocaleString() }}</span>

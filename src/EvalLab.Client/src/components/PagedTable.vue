@@ -7,9 +7,11 @@
   import TrashCanIcon from './icons/TrashCanIcon.vue';
   import WaitingSpinner from './WaitingSpinner.vue';
 
+  // TODO: Add search filter
+
   export type TableData<T> =
     | {
-        status: 'loading' | 'error';
+        status: 'initial' | 'loading' | 'error';
       }
     | {
         status: 'success';

@@ -61,8 +61,15 @@ abstract class MongoRepository<T>(MongoDbContext context) : IRepository<T> where
     return entity;
   }
 
-  public virtual async Task DeleteAsync(FilterSpecification<T> spec)
+  public virtual async Task<bool> DeleteAsync(FilterSpecification<T> spec)
   {
-    await _collection.DeleteOneAsync(spec.ToExpression());
+    var result = await _collection.DeleteOneAsync(spec.ToExpression());
+    return result.DeletedCount > 0;
+  }
+
+  public virtual async Task<bool> UpdateAsync(FilterSpecification<T> spec, T entity)
+  {
+    var result = await _collection.ReplaceOneAsync(spec.ToExpression(), entity);
+    return result.ModifiedCount > 0;
   }
 }

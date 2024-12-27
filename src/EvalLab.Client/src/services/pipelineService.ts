@@ -16,6 +16,10 @@ type NewPipeline = {
 
 export type Pipeline = NewPipeline & Entity;
 
+export type PipelineWithRuns = Pipeline & {
+  runs: Run[];
+};
+
 export type Run = {
   id: string;
   input: string;
@@ -23,7 +27,7 @@ export type Run = {
   createdDate: Date;
 };
 
-type PipelinesService = GenericService<NewPipeline, Pipeline> & {
+type PipelinesService = GenericService<NewPipeline, Pipeline, PipelineWithRuns> & {
   run(id: string, input: string): Promise<Result<Run>>;
 };
 
@@ -34,7 +38,7 @@ export const PipelinesServiceKey: PipelinesServiceKeyType = Symbol('PipelinesSer
 const BASE_URL = '/api/pipelines';
 
 export const pipelinesService: PipelinesService = Object.freeze({
-  ...createGenericService(BASE_URL, createPipeline),
+  ...createGenericService(BASE_URL, createPipeline, createPipelineWithRuns),
   run: async function (id: string, input: string) {
     const response = await makeRequest<Run>(`${BASE_URL}/${id}/run`, {
       method: 'POST',
@@ -59,5 +63,23 @@ function createPipeline(data: any): Pipeline {
     description: data.description,
     createdDate: new Date(data.createdDate),
     updatedDate: new Date(data.updatedDate),
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createPipelineWithRuns(data: any): PipelineWithRuns {
+  return {
+    ...createPipeline(data),
+    runs: data.runs.map(createRun),
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createRun(data: any): Run {
+  return {
+    id: data.id,
+    input: data.input,
+    output: data.output,
+    createdDate: new Date(data.createdDate),
   };
 }

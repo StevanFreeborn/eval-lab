@@ -14,10 +14,12 @@ export type Span = {
 export type Trace = Entity & {
   runId: string;
   duration: number;
+  start: number;
+  end: number;
   spans: Span[];
 };
 
-type TracesService = Pick<GenericService<Trace, Trace>, 'get'>;
+type TracesService = Pick<GenericService<Trace, Trace, Trace>, 'get'>;
 
 type TracesServiceKeyType = InjectionKey<TracesService>;
 
@@ -25,7 +27,7 @@ export const TracesServiceKey: TracesServiceKeyType = Symbol('TracesService');
 
 const BASE_URL = '/api/traces';
 
-const { get } = createGenericService(BASE_URL, createTrace);
+const { get } = createGenericService(BASE_URL, createTrace, createTrace);
 
 export const tracesService: TracesService = Object.freeze({ get });
 
@@ -36,6 +38,8 @@ function createTrace(data: any): Trace {
     runId: data.runId,
     name: data.name,
     duration: data.duration,
+    start: data.start,
+    end: data.end,
     spans: data.spans.map(createSpan),
     createdDate: new Date(data.createdDate),
     updatedDate: new Date(data.updatedDate),

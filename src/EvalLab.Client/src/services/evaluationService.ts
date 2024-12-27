@@ -8,7 +8,7 @@ type NewEvaluation = {
 
 export type Evaluation = NewEvaluation & Entity;
 
-type EvaluationsService = GenericService<NewEvaluation, Evaluation>;
+type EvaluationsService = GenericService<NewEvaluation, Evaluation, Evaluation>;
 
 type EvaluationsServiceKeyType = InjectionKey<EvaluationsService>;
 
@@ -17,7 +17,7 @@ export const EvaluationsServiceKey: EvaluationsServiceKeyType = Symbol('Evaluati
 const BASE_URL = '/api/evaluations';
 
 export const evaluationsService: EvaluationsService = Object.freeze(
-  createGenericService(BASE_URL, createEvaluation),
+  createGenericService(BASE_URL, createEvaluation, createEvaluation),
 );
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
