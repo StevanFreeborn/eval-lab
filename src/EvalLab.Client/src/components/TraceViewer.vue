@@ -93,7 +93,10 @@
   >
     <p>No trace data available. Waiting...</p>
   </div>
-  <div v-else>
+  <div
+    class="trace-viewer-container"
+    v-else
+  >
     <div
       class="trace-header"
       style=""
@@ -148,6 +151,10 @@
     width: 100%;
   }
 
+  .trace-viewer-container {
+    overflow: auto;
+  }
+
   .trace-header {
     padding: 0.75rem;
     background-color: var(--background-color);
@@ -156,11 +163,16 @@
 
   .trace-info {
     display: flex;
-    gap: 1rem;
+    column-gap: 1rem;
+    row-gap: 0.25rem;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .trace-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-weight: 600;
   }
 

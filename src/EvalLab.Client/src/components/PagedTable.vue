@@ -304,6 +304,10 @@
     width: 1%;
   }
 
+  td {
+    vertical-align: sub;
+  }
+
   .actions-container {
     display: flex;
     gap: 0.5rem;

@@ -1,23 +1,27 @@
 <script setup lang="ts">
   import { onMounted, ref } from 'vue';
   import { useRoute } from 'vue-router';
+  import TrashCanIcon from '../components/icons/TrashCanIcon.vue';
+  import SlideDrawer from '../components/SlideDrawer.vue';
+  import TraceViewer from '../components/TraceViewer.vue';
   import { useService } from '../composables/useService.ts';
   import { Pipeline, PipelinesServiceKey } from '../services/pipelineService.ts';
   import { Run, RunsServiceKey } from '../services/runService.ts';
 
-  // TODO: Runs will be queried separately and will be paginated
-  // TODO: Add actions for each run: trace view and delete
-  // TODO: Should runs be a table instead of a list?
+  // TODO: Pagination/filtering for runs
+  // TODO: Support updating pipeline
 
   const route = useRoute();
   const pipelineId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
   const pipeline = ref<Pipeline>();
   const runs = ref<Run[]>([]);
+  const selectedRun = ref<Run | null>(null);
+  const drawerOpen = ref(false);
 
   const pipelinesService = useService(PipelinesServiceKey);
   const runsService = useService(RunsServiceKey);
 
-  onMounted(async () => {
+  async function getPipeline() {
     const getPipelineResult = await pipelinesService.get(pipelineId);
 
     if (getPipelineResult.failed) {
@@ -26,9 +30,11 @@
     }
 
     pipeline.value = getPipelineResult.value;
-  });
+  }
 
-  onMounted(async () => {
+  onMounted(getPipeline);
+
+  async function getRuns() {
     const getRunsResult = await runsService.getAll({ additionalParams: { pipelineId } });
 
     if (getRunsResult.failed) {
@@ -37,7 +43,39 @@
     }
 
     runs.value = getRunsResult.value.items;
-  });
+  }
+
+  onMounted(getRuns);
+
+  async function handleDeleteRunClick(runId: string) {
+    const isSure = confirm('Are you sure you want to delete this run?');
+
+    if (!isSure) {
+      return;
+    }
+
+    const deleteRunResult = await runsService.delete(runId);
+
+    if (deleteRunResult.failed) {
+      console.error(deleteRunResult.error.message);
+      return;
+    }
+
+    getRuns();
+  }
+
+  function openDrawer() {
+    drawerOpen.value = true;
+  }
+
+  function closeDrawer() {
+    drawerOpen.value = false;
+  }
+
+  function handleTraceClick(run: Run) {
+    selectedRun.value = run;
+    openDrawer();
+  }
 </script>
 
 <template>
@@ -73,8 +111,8 @@
 
       <div class="runs-section">
         <h2>Runs ({{ runs.length }})</h2>
-        <div class="runs-list">
-          <div
+        <ul class="runs-list">
+          <li
             v-for="run in runs"
             :key="run.id"
             class="run-item"
@@ -99,11 +137,39 @@
                 <div class="io-content">{{ run.output }}</div>
               </div>
             </div>
-          </div>
-        </div>
+            <div class="run-actions">
+              <button
+                type="button"
+                @click="handleTraceClick(run)"
+              >
+                Trace
+              </button>
+              <button
+                type="button"
+                @click="handleDeleteRunClick(run.id)"
+              >
+                <TrashCanIcon />
+                <span class="sr-only">Delete Run</span>
+              </button>
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
+  <SlideDrawer
+    :heading="`Trace for Run ${selectedRun?.id}`"
+    :drawer-open="drawerOpen"
+    @drawer-closed="closeDrawer"
+  >
+    <div style="padding: 1rem; width: 100%">
+      <TraceViewer
+        v-if="selectedRun"
+        :run-id="selectedRun.id"
+      />
+      <div v-else>No run selected.</div>
+    </div>
+  </SlideDrawer>
 </template>
 
 <style scoped>
@@ -209,5 +275,28 @@
     background-color: var(--secondary-background-color);
     padding: 0.75rem;
     border-radius: 0.375rem;
+  }
+
+  .run-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .run-actions button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border: 2px solid var(--secondary-background-color);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .run-actions button svg {
+    width: 1rem;
+    height: 1rem;
   }
 </style>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-  import PipelineIcon from '../components/icons/PipelineIcon.vue';
+  import { RouterLink, RouterView } from 'vue-router';
   import FlaskIcon from '../components/icons/FlaskIcon.vue';
-  import RulerIcon from '../components/icons/RulerIcon.vue';
   import MicroscopeIcon from '../components/icons/MicroscopeIcon.vue';
-  import { RouterView, RouterLink } from 'vue-router';
+  import PipelineIcon from '../components/icons/PipelineIcon.vue';
+  import RulerIcon from '../components/icons/RulerIcon.vue';
 </script>
 
 <template>
@@ -70,6 +70,7 @@
     min-height: 0;
     gap: 1rem;
     position: relative;
+    overflow: hidden;
   }
 
   aside {
@@ -119,6 +120,7 @@
     flex: 1;
     padding: 1rem;
     max-width: 100%;
+    overflow: auto;
   }
 
   .main-content {
