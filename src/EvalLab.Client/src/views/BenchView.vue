@@ -15,8 +15,6 @@
 
   const pipelinesService = useService(PipelinesServiceKey);
 
-  // TODO: Actually send input to pipeline via API and get response
-  // TODO: Make an actual form?
   async function handleSubmit() {
     if (!selectedPipeline.value.id) {
       alert('Please select a pipeline');
