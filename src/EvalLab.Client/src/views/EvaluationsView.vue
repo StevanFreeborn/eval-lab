@@ -1,39 +1,29 @@
 <script setup lang="ts">
   import { onMounted, ref, useTemplateRef } from 'vue';
-  import { RouterLink } from 'vue-router';
+  import PagedTable, { TableData } from '../components/PagedTable.vue';
   import SlideDrawer from '../components/SlideDrawer.vue';
-  import WaitingSpinner from '../components/WaitingSpinner.vue';
   import AddButton from '../components/buttons/AddButton.vue';
   import AddEvaluationForm, {
     AddEvaluationFormComponent,
   } from '../components/forms/AddEvaluationForm.vue';
-  import PencilIcon from '../components/icons/PencilIcon.vue';
-  import TrashCanIcon from '../components/icons/TrashCanIcon.vue';
   import { useService } from '../composables/useService.ts';
   import { Evaluation, EvaluationsServiceKey } from '../services/evaluationService.ts';
-  import { convertToTitleCase } from '../shared/utils.ts';
 
   const drawerOpen = ref(false);
 
   const addForm = useTemplateRef<AddEvaluationFormComponent>('addForm');
 
-  const data = ref<{
-    items: Evaluation[];
-    status: 'loading' | 'error' | 'success' | '';
-  }>({
-    items: [],
-    status: '',
-  });
+  const data = ref<TableData<Evaluation>>({ status: 'loading' });
 
   const evaluationsService = useService(EvaluationsServiceKey);
 
-  async function getEvaluations() {
+  async function getEvaluations(pageNumber?: number, pageSize?: number) {
     const timeout = setTimeout(() => {
       data.value.status = 'loading';
     }, 500);
 
     try {
-      const getEvaluationsResult = await evaluationsService.getAll();
+      const getEvaluationsResult = await evaluationsService.getAll(pageNumber, pageSize);
 
       if (getEvaluationsResult.failed) {
         console.error(getEvaluationsResult.error.message);
@@ -41,8 +31,7 @@
         return;
       }
 
-      data.value.items = getEvaluationsResult.value.items;
-      data.value.status = 'success';
+      data.value = { status: 'success', page: getEvaluationsResult.value };
       return getEvaluationsResult.value;
     } finally {
       clearTimeout(timeout);
@@ -84,6 +73,30 @@
 
     getEvaluations();
   }
+
+  function handlePreviousPage() {
+    if (data.value.status !== 'success') {
+      return;
+    }
+
+    getEvaluations(data.value.page.pageNumber - 1);
+  }
+
+  function handleNextPage() {
+    if (data.value.status !== 'success') {
+      return;
+    }
+
+    getEvaluations(data.value.page.pageNumber + 1);
+  }
+
+  function handleGotoPage(pageNumber: number) {
+    if (data.value.status !== 'success') {
+      return;
+    }
+
+    getEvaluations(pageNumber);
+  }
 </script>
 
 <template>
@@ -96,56 +109,15 @@
         @clicked="openDrawer"
       />
     </div>
-    <div class="table-container">
-      <WaitingSpinner
-        v-if="data.status === 'loading'"
-        height="3rem"
-        width="3rem"
-      />
-      <div v-else-if="data.status === 'error'">Failed to load evaluations</div>
-      <div v-else-if="data.items.length === 0 && data.status">No evaluations found</div>
-      <table v-else-if="data.status">
-        <thead>
-          <tr>
-            <th></th>
-            <th
-              v-for="(_, key) in data.items[0]"
-              :key="key"
-            >
-              {{ convertToTitleCase(key) }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="item in data.items"
-            :key="item.id"
-          >
-            <td>
-              <div class="actions-container">
-                <RouterLink :to="`/evaluations/${item.id}/edit`">
-                  <PencilIcon />
-                  <span class="sr-only">Edit</span>
-                </RouterLink>
-                <button
-                  type="button"
-                  @click="() => deleteEvaluation(item.id)"
-                >
-                  <TrashCanIcon />
-                  <span class="sr-only">Delete</span>
-                </button>
-              </div>
-            </td>
-            <td
-              v-for="(value, name) in item"
-              :key="name"
-            >
-              {{ value instanceof Date ? value.toLocaleDateString() : value }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <PagedTable
+      :data="data"
+      :get-item-key="evaluation => evaluation.id"
+      :build-edit-link="evaluation => `/evaluations/${evaluation.id}/edit`"
+      :delete-item-handler="evaluation => deleteEvaluation(evaluation.id)"
+      @previous-page="handlePreviousPage"
+      @goto-page="handleGotoPage"
+      @next-page="handleNextPage"
+    />
   </div>
   <SlideDrawer
     heading="Add Evaluation"

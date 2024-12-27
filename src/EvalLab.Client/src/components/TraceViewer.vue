@@ -2,12 +2,12 @@
   import { computed, onMounted, ref, watch } from 'vue';
   import { useService } from '../composables/useService';
   import { Span, Trace, TracesServiceKey } from '../services/traceService';
-  import WaitingSpinner from './WaitingSpinner.vue';
 
   const props = defineProps<{
     runId: string;
   }>();
 
+  // TODO: Use websockets for real-time updates
   const trace = ref<Trace | null>(null);
   const tracesService = useService(TracesServiceKey);
 
@@ -95,11 +95,7 @@
     class="loading-container"
     v-if="!trace"
   >
-    <WaitingSpinner
-      height="3rem"
-      width="3rem"
-    />
-    <p>Waiting on trace...</p>
+    <p>No trace data available. Waiting...</p>
   </div>
   <div v-else>
     <div class="trace-header">

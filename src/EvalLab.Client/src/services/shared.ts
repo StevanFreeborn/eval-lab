@@ -28,7 +28,13 @@ export type Entity = {
 
 export type GenericService<NewT, T extends Entity> = {
   create(item: NewT): Promise<Result<T>>;
-  getAll(): Promise<Result<Page<T>>>;
+  getAll(
+    pageNumber?: number,
+    pageSize?: number,
+    sortBy?: string,
+    sortOrder?: 'asc' | 'desc',
+    name?: string,
+  ): Promise<Result<Page<T>>>;
   get(id: string): Promise<Result<T>>;
   delete(id: string): Promise<Result<true>>;
 };
@@ -105,6 +111,10 @@ export async function makeRequest<T>(url: string, options: RequestInit): Promise
 
     if (response.ok === false) {
       return result.failure(new Error(`${response.status} ${response.statusText}`));
+    }
+
+    if (response.status === 204) {
+      return result.success(true as unknown as T);
     }
 
     const data = await response.json();
