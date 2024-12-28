@@ -27,6 +27,25 @@ static class MongoClassMap
       cm.SetIgnoreExtraElements(true);
     });
 
+    BsonClassMap.TryRegisterClassMap<SuccessCriteria>(cm =>
+    {
+      cm.AutoMap();
+      cm.SetIgnoreExtraElements(true);
+      cm.SetIsRootClass(true);
+    });
+
+    BsonClassMap.TryRegisterClassMap<NullSuccessCriteria>(cm =>
+    {
+      cm.AutoMap();
+      cm.SetIgnoreExtraElements(true);
+    });
+
+    BsonClassMap.TryRegisterClassMap<UnstructuredExactMatch>(cm =>
+    {
+      cm.AutoMap();
+      cm.SetIgnoreExtraElements(true);
+    });
+
     BsonClassMap.TryRegisterClassMap<Pipeline>(cm =>
     {
       cm.AutoMap();

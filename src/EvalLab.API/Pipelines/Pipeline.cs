@@ -16,6 +16,7 @@ class Pipeline : Entity
     {
       var response = await client.PostAsJsonAsync(Endpoint, request);
       var output = await response.Content.ReadFromJsonAsync<RunResponse>();
+
       return Result<Run>.Success(new Run()
       {
         PipelineId = request.PipelineId,

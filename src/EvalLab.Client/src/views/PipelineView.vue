@@ -86,7 +86,7 @@
       class="content"
     >
       <div class="header">
-        <h1>{{ pipeline.name }}</h1>
+        <h2>{{ pipeline.name }}</h2>
         <p class="description">{{ pipeline.description }}</p>
       </div>
 
@@ -96,10 +96,6 @@
           <p class="monospace">{{ pipeline.id }}</p>
         </div>
         <div class="detail-item">
-          <label>Endpoint</label>
-          <p class="monospace">{{ pipeline.endpoint }}</p>
-        </div>
-        <div class="detail-item">
           <label>Created Date</label>
           <p>{{ pipeline.createdDate.toLocaleString() }}</p>
         </div>
@@ -107,10 +103,14 @@
           <label>Updated Date</label>
           <p>{{ pipeline.updatedDate.toLocaleString() }}</p>
         </div>
+        <div class="detail-item">
+          <label>Endpoint</label>
+          <p class="monospace">{{ pipeline.endpoint }}</p>
+        </div>
       </div>
 
       <div class="runs-section">
-        <h2>Runs ({{ runs.length }})</h2>
+        <h3>Runs ({{ runs.length }})</h3>
         <ul class="runs-list">
           <li
             v-for="run in runs"
@@ -192,7 +192,7 @@
     padding-bottom: 1rem;
   }
 
-  .header h1 {
+  .header h2 {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
@@ -202,6 +202,10 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+  }
+
+  .details-grid .detail-item:first-child {
+    grid-column: -1 / 1;
   }
 
   .detail-item {
@@ -227,7 +231,7 @@
     margin-top: 2rem;
   }
 
-  .runs-section h2 {
+  .runs-section h3 {
     font-size: 1.125rem;
     font-weight: bold;
     margin-bottom: 1rem;

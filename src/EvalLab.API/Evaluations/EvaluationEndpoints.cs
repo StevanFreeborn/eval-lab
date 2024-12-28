@@ -1,5 +1,6 @@
 using EvalLab.API.Common;
 using EvalLab.API.Data;
+using EvalLab.API.Pipelines;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,6 +46,27 @@ static class EvaluationEndpoints
     {
       var isDeleted = await repo.DeleteAsync(FilterSpecification<Evaluation>.From(e => e.Id == id));
       return isDeleted ? Results.NoContent() : Results.NotFound();
+    });
+
+    group.MapPost("{id}/test", async (
+      string id,
+      [FromBody] EvaluationDto dto,
+      [FromServices] IRepository<Evaluation> evaluationRepo,
+      [FromServices] IRepository<Pipeline> pipelineRepo,
+      [FromServices] HttpClient client
+    ) =>
+    {
+      var evaluation = dto.ToEvaluation();
+      var pipeline = await pipelineRepo.GetAsync(FilterSpecification<Pipeline>.From(p => p.Id == evaluation.TargetPipelineId));
+
+      if (pipeline is null)
+      {
+        return Results.BadRequest("Invalid pipeline");
+      }
+
+      var testResult = await evaluation.RunAsync(pipeline, client);
+
+      return Results.Ok(testResult);
     });
 
     return app;

@@ -4,12 +4,14 @@
   import { createDebouncedHandler } from '../../shared/utils';
   import WaitingSpinner from '../WaitingSpinner.vue';
 
+  // TODO: Revisit accessibility of this component
+
   export type Option = {
     id: string;
     name: string;
   };
 
-  const selectedOption = defineModel<Option>();
+  const selectedOptionId = defineModel<string>();
 
   type Props = {
     getOptions: (params: GetAllParams) => Promise<Result<Page<T>>>;
@@ -29,6 +31,13 @@
   const currentPage = computed(() => pages.value.at(-1));
   const options = computed(() =>
     pages.value?.flatMap(p => p.items.flatMap(i => props.mapOption(i as T))),
+  );
+  const selectedOption = computed(
+    () =>
+      options.value.find(o => o.id === selectedOptionId.value) ?? {
+        id: '',
+        name: props.placeholder,
+      },
   );
   const nameFilter = ref<string>('');
   const loading = ref<boolean>(false);
@@ -75,14 +84,15 @@
   const filterInputRef = useTemplateRef<HTMLInputElement | null>('filter');
   const menuOpen = ref(false);
 
-  watch(menuOpen, value => {
+  watch(menuOpen, async value => {
     if (value) {
-      nextTick(() => filterInputRef.value?.focus());
+      await nextTick();
+      filterInputRef.value?.focus();
     }
   });
 
   function handleOptionClick(option: Option) {
-    selectedOption.value = option;
+    selectedOptionId.value = option ? option.id : '';
     menuOpen.value = false;
     selectedOptionRef.value?.focus();
   }

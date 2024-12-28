@@ -111,6 +111,7 @@
     </div>
     <PagedTable
       :data="data"
+      :columns="['id', 'name', 'description', 'createdDate', 'updatedDate']"
       :get-item-key="evaluation => evaluation.id"
       :build-edit-link="evaluation => `/evaluations/${evaluation.id}`"
       :delete-item-handler="evaluation => deleteEvaluation(evaluation.id)"

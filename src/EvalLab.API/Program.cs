@@ -3,11 +3,17 @@ using AnthropicClient;
 using EvalLab.API.Data;
 using EvalLab.API.Demo;
 using EvalLab.API.Evaluations;
+using EvalLab.API.Json;
 using EvalLab.API.Pipelines;
 using EvalLab.API.Traces;
 using EvalLab.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.ConfigureHttpJsonOptions(o =>
+{
+  o.SerializerOptions.Converters.Add(new SuccessCriteriaConverter());
+});
 
 builder.Services.AddRequestDecompression();
 

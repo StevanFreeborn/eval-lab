@@ -20,6 +20,7 @@
 
   type Props = {
     data: TableData<T>;
+    columns: (keyof T)[];
     getItemKey: (item: T) => string;
     buildEditLink: (item: T) => string;
     deleteItemHandler: (item: T) => void;
@@ -123,10 +124,10 @@
             <tr>
               <th></th>
               <th
-                v-for="key in Object.keys(data.page.items[0] as object)"
+                v-for="key in columns"
                 :key="key"
               >
-                {{ convertToTitleCase(key) }}
+                {{ convertToTitleCase(key.toString()) }}
               </th>
             </tr>
           </thead>
@@ -151,10 +152,10 @@
                 </div>
               </td>
               <td
-                v-for="(value, name) in item"
-                :key="name"
+                v-for="key in columns"
+                :key="key"
               >
-                {{ value instanceof Date ? value.toLocaleDateString() : value }}
+                {{ item[key] instanceof Date ? item[key].toLocaleDateString() : item[key] }}
               </td>
             </tr>
           </tbody>
