@@ -102,7 +102,7 @@
           :map-option="i => ({ id: i.id, name: i.name })"
           sort-by="name"
           sort-order="asc"
-          v-model="selectedPipeline"
+          v-model="selectedPipeline.id"
           placeholder="Select a pipeline"
           search-placeholder="Search pipelines"
           :required="true"

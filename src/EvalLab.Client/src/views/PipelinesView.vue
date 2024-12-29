@@ -111,6 +111,7 @@
     </div>
     <PagedTable
       :data="data"
+      :columns="['id', 'name', 'description', 'createdDate', 'updatedDate']"
       :get-item-key="pipeline => pipeline.id"
       :build-edit-link="pipeline => `/pipelines/${pipeline.id}`"
       :delete-item-handler="pipeline => deletePipeline(pipeline.id)"

@@ -1,9 +1,15 @@
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import { useRoute } from 'vue-router';
   import PagedDropdown from '../components/controls/PagedDropdown.vue';
+  import ThumbsDownIcon from '../components/icons/ThumbsDownIcon.vue';
+  import ThumbsUpIcon from '../components/icons/ThumbsUpIcon.vue';
+  import RunCard from '../components/RunCard.vue';
+  import SlideDrawer from '../components/SlideDrawer.vue';
+  import TraceViewer from '../components/TraceViewer.vue';
+  import WaitingSpinner from '../components/WaitingSpinner.vue';
   import { useService } from '../composables/useService.ts';
-  import { Evaluation, EvaluationsServiceKey } from '../services/evaluationService.ts';
+  import { Evaluation, EvaluationsServiceKey, TestResult } from '../services/evaluationService.ts';
   import { PipelinesServiceKey } from '../services/pipelineService.ts';
 
   // TODO: Evaluations need further defining
@@ -26,11 +32,36 @@
   const route = useRoute();
   const evaluationId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
   const evaluation = ref<Evaluation>();
+  const isValidEvaluation = computed(
+    () =>
+      evaluation.value !== undefined &&
+      !evaluation.value.input &&
+      !evaluation.value.targetPipelineId &&
+      evaluation.value.successCriteria.type !== 'null',
+  );
+  const evaluationTestResult = ref<
+    | {
+        status: 'idle' | 'loading' | 'failed';
+      }
+    | {
+        status: 'success';
+        testResult: TestResult;
+      }
+  >({ status: 'idle' });
+  const drawerOpen = ref(false);
 
   const evaluationsService = useService(EvaluationsServiceKey);
   const pipelinesService = useService(PipelinesServiceKey);
 
-  onMounted(async () => {
+  function closeDrawer() {
+    drawerOpen.value = false;
+  }
+
+  function openDrawer() {
+    drawerOpen.value = true;
+  }
+
+  async function getEvaluation() {
     const getEvaluationResult = await evaluationsService.get(evaluationId);
 
     if (getEvaluationResult.failed) {
@@ -39,7 +70,38 @@
     }
 
     evaluation.value = getEvaluationResult.value;
-  });
+  }
+
+  onMounted(getEvaluation);
+
+  async function testEvaluation() {
+    if (evaluation.value) {
+      evaluationTestResult.value = { status: 'loading' };
+
+      const testResult = await evaluationsService.test(evaluation.value);
+
+      if (testResult.failed) {
+        console.error(testResult.error.message);
+        evaluationTestResult.value = { status: 'failed' };
+        return;
+      }
+
+      evaluationTestResult.value = { status: 'success', testResult: testResult.value };
+      openDrawer();
+    }
+  }
+
+  async function performEvaluation() {
+    evaluationTestResult.value = { status: 'idle' };
+    openDrawer();
+
+    // TOOD: Need to show drawer with form to collect following information
+    // - Expected proportion of runs to pass
+    // - Desired confidence level
+    // - Desired margin of error
+    // - when these are entered the form should show sample size required
+    // - user should then be able to confirm and start evaluation
+  }
 </script>
 
 <template>
@@ -131,20 +193,60 @@
       <div class="actions">
         <button
           type="button"
-          @click="
-            async () => {
-              if (evaluation) {
-                await evaluationsService.test(evaluation);
-              }
-            }
-          "
+          @click="testEvaluation"
+          :disabled="!isValidEvaluation"
         >
+          <WaitingSpinner
+            v-if="evaluationTestResult.status === 'loading'"
+            height="1rem"
+            width="1rem"
+          />
           Test Evaluation
         </button>
-        <button type="button">Perform Evaluation</button>
+        <button
+          type="button"
+          @click="performEvaluation"
+          :disabled="!isValidEvaluation"
+        >
+          Perform Evaluation
+        </button>
       </div>
     </div>
   </div>
+  <SlideDrawer
+    :heading="
+      evaluationTestResult.status === 'success' ? 'Evaluation Test Result' : 'Perform Evaluation'
+    "
+    :drawer-open="drawerOpen"
+    @drawer-closed="closeDrawer"
+  >
+    <div
+      v-if="evaluationTestResult.status === 'success'"
+      class="test-result-container"
+    >
+      <div class="test-result-status">
+        <div
+          v-if="evaluationTestResult.testResult.passed"
+          class="success"
+        >
+          <ThumbsUpIcon />
+          Passed
+        </div>
+        <div
+          v-else
+          class="failed"
+        >
+          <ThumbsDownIcon />
+          Failed
+        </div>
+      </div>
+      <RunCard
+        :run="evaluationTestResult.testResult.run"
+        style="background-color: var(--background-color)"
+      />
+      <TraceViewer :run-id="evaluationTestResult.testResult.run.id" />
+    </div>
+  </SlideDrawer>
 </template>
 
 <style scoped>
@@ -253,8 +355,53 @@
   }
 
   .actions button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;
     background-color: var(--secondary-background-color);
+  }
+
+  .actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .test-result-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  .test-result-status {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    background-color: var(--secondary-background-color);
+    align-items: center;
+  }
+
+  .test-result-status div {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 1.5rem;
+  }
+
+  .test-result-status svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .test-result-status .success svg {
+    color: #2c786c;
+  }
+
+  .test-result-status .failed svg {
+    color: #e53e3e;
   }
 </style>

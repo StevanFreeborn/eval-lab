@@ -21,7 +21,7 @@ export type Evaluation = NewEvaluation &
     successCriteria: SuccessCriteria;
   };
 
-type TestResult = {
+export type TestResult = {
   run: Run;
   passed: boolean;
 };

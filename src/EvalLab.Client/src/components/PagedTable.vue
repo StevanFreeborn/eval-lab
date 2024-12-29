@@ -1,8 +1,8 @@
 <script setup lang="ts" generic="T">
   import { Page } from '../services/shared';
   import { convertToTitleCase, createDebouncedHandler } from '../shared/utils';
-  import ChevronLeft from './icons/ChevronLeft.vue';
-  import ChevronRight from './icons/ChevronRight.vue';
+  import ChevronLeftIcon from './icons/ChevronLeftIcon.vue';
+  import ChevronRightIcon from './icons/ChevronRightIcon.vue';
   import PencilIcon from './icons/PencilIcon.vue';
   import TrashCanIcon from './icons/TrashCanIcon.vue';
   import WaitingSpinner from './WaitingSpinner.vue';
@@ -85,7 +85,7 @@
             type="button"
             @click="handlePreviousPage"
           >
-            <ChevronLeft />
+            <ChevronLeftIcon />
             <span class="sr-only">Previous Page</span>
           </button>
           <div class="page-number-container">
@@ -115,7 +115,7 @@
             type="button"
             @click="handleNextPage"
           >
-            <ChevronRight />
+            <ChevronRightIcon />
             <span class="sr-only">Next Page</span>
           </button>
         </div>

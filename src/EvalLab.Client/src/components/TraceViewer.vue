@@ -207,7 +207,6 @@
     height: 1.5rem;
     padding: 0.25rem 0.5rem;
     border-radius: 0.125rem;
-    min-width: 100px;
     cursor: pointer;
   }
 

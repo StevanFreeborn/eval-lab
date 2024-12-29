@@ -1,7 +1,9 @@
 <script setup lang="ts">
   import { onMounted, ref } from 'vue';
   import { useRoute } from 'vue-router';
+  import ChartBarIcon from '../components/icons/ChartBarIcon.vue';
   import TrashCanIcon from '../components/icons/TrashCanIcon.vue';
+  import RunCard from '../components/RunCard.vue';
   import SlideDrawer from '../components/SlideDrawer.vue';
   import TraceViewer from '../components/TraceViewer.vue';
   import { useService } from '../composables/useService.ts';
@@ -109,49 +111,36 @@
         </div>
       </div>
 
-      <div class="runs-section">
+      <div
+        class="runs-section"
+        ref="runsSection"
+      >
         <h3>Runs ({{ runs.length }})</h3>
         <ul class="runs-list">
           <li
+            :id="run.id"
             v-for="run in runs"
             :key="run.id"
             class="run-item"
           >
-            <div class="run-header">
-              <div class="detail-item">
-                <label>Run ID</label>
-                <p class="monospace">{{ run.id }}</p>
-              </div>
-              <div class="detail-item">
-                <label>Created Date</label>
-                <p>{{ run.createdDate.toLocaleString() }}</p>
-              </div>
-            </div>
-            <div class="run-content">
-              <div class="io-section">
-                <label>Input</label>
-                <div class="io-content">{{ run.input }}</div>
-              </div>
-              <div class="io-section">
-                <label>Output</label>
-                <div class="io-content">{{ run.output }}</div>
-              </div>
-            </div>
-            <div class="run-actions">
-              <button
-                type="button"
-                @click="handleTraceClick(run)"
-              >
-                Trace
-              </button>
-              <button
-                type="button"
-                @click="handleDeleteRunClick(run.id)"
-              >
-                <TrashCanIcon />
-                <span class="sr-only">Delete Run</span>
-              </button>
-            </div>
+            <RunCard :run="run">
+              <div class="run-actions">
+                <button
+                  type="button"
+                  @click="() => handleTraceClick(run)"
+                >
+                  <ChartBarIcon />
+                  <span class="sr-only">View Trace</span>
+                </button>
+                <button
+                  type="button"
+                  @click="() => handleDeleteRunClick(run.id)"
+                >
+                  <TrashCanIcon />
+                  <span class="sr-only">Delete Run</span>
+                </button>
+              </div></RunCard
+            >
           </li>
         </ul>
       </div>
@@ -248,37 +237,6 @@
   .run-item {
     border: 2px solid var(--secondary-background-color);
     border-radius: 0.5rem;
-    padding: 1rem;
-  }
-
-  .run-header {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .run-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .io-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .io-section label {
-    font-size: 0.875rem;
-    font-weight: bold;
-  }
-
-  .io-content {
-    background-color: var(--secondary-background-color);
-    padding: 0.75rem;
-    border-radius: 0.375rem;
   }
 
   .run-actions {
