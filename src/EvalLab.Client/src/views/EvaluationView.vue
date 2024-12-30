@@ -15,6 +15,8 @@
   import { Evaluation, EvaluationsServiceKey, TestRun } from '../services/evaluationService.ts';
   import { PipelinesServiceKey } from '../services/pipelineService.ts';
 
+  // TODO: Separate table logic into component
+
   const route = useRoute();
   const evaluationId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
   const evaluation = ref<Evaluation>();

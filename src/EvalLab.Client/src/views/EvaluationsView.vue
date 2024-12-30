@@ -9,9 +9,6 @@
   import { useService } from '../composables/useService.ts';
   import { Evaluation, EvaluationsServiceKey } from '../services/evaluationService.ts';
 
-  // TODO: Separate table logic into component
-  // TODO: Restrict confidence level to 80, 85, 90, 95, 99
-
   const drawerOpen = ref(false);
 
   const addForm = useTemplateRef<AddEvaluationFormComponent>('addForm');
