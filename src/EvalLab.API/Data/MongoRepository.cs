@@ -72,4 +72,9 @@ abstract class MongoRepository<T>(MongoDbContext context) : IRepository<T> where
     var result = await _collection.ReplaceOneAsync(spec.ToExpression(), entity);
     return result.ModifiedCount > 0;
   }
+
+  public virtual async Task<long> CountAsync(FilterSpecification<T> spec)
+  {
+    return await _collection.CountDocumentsAsync(spec.ToExpression());
+  }
 }

@@ -3,12 +3,12 @@
   import { useRoute } from 'vue-router';
   import ChartBarIcon from '../components/icons/ChartBarIcon.vue';
   import TrashCanIcon from '../components/icons/TrashCanIcon.vue';
-  import RunCard from '../components/RunCard.vue';
+  import PipelineRunCard from '../components/PipelineRunCard.vue';
   import SlideDrawer from '../components/SlideDrawer.vue';
   import TraceViewer from '../components/TraceViewer.vue';
   import { useService } from '../composables/useService.ts';
+  import { PipelineRun, PipelineRunsServiceKey } from '../services/pipelineRunService.ts';
   import { Pipeline, PipelinesServiceKey } from '../services/pipelineService.ts';
-  import { Run, RunsServiceKey } from '../services/runService.ts';
 
   // TODO: Pagination/filtering for runs
   // TODO: Support updating pipeline
@@ -16,12 +16,12 @@
   const route = useRoute();
   const pipelineId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
   const pipeline = ref<Pipeline>();
-  const runs = ref<Run[]>([]);
-  const selectedRun = ref<Run | null>(null);
+  const pipelineRuns = ref<PipelineRun[]>([]);
+  const selectedPipelineRun = ref<PipelineRun | null>(null);
   const drawerOpen = ref(false);
 
   const pipelinesService = useService(PipelinesServiceKey);
-  const runsService = useService(RunsServiceKey);
+  const pipelineRunsService = useService(PipelineRunsServiceKey);
 
   async function getPipeline() {
     const getPipelineResult = await pipelinesService.get(pipelineId);
@@ -36,18 +36,20 @@
 
   onMounted(getPipeline);
 
-  async function getRuns() {
-    const getRunsResult = await runsService.getAll({ additionalParams: { pipelineId } });
+  async function getPipelineRuns() {
+    const getPipelineRunsResult = await pipelineRunsService.getAll({
+      additionalParams: { pipelineId },
+    });
 
-    if (getRunsResult.failed) {
-      console.error(getRunsResult.error.message);
+    if (getPipelineRunsResult.failed) {
+      console.error(getPipelineRunsResult.error.message);
       return;
     }
 
-    runs.value = getRunsResult.value.items;
+    pipelineRuns.value = getPipelineRunsResult.value.items;
   }
 
-  onMounted(getRuns);
+  onMounted(getPipelineRuns);
 
   async function handleDeleteRunClick(runId: string) {
     const isSure = confirm('Are you sure you want to delete this run?');
@@ -56,14 +58,14 @@
       return;
     }
 
-    const deleteRunResult = await runsService.delete(runId);
+    const deleteRunResult = await pipelineRunsService.delete(runId);
 
     if (deleteRunResult.failed) {
       console.error(deleteRunResult.error.message);
       return;
     }
 
-    getRuns();
+    getPipelineRuns();
   }
 
   function openDrawer() {
@@ -74,8 +76,8 @@
     drawerOpen.value = false;
   }
 
-  function handleTraceClick(run: Run) {
-    selectedRun.value = run;
+  function handleTraceClick(pipelineRun: PipelineRun) {
+    selectedPipelineRun.value = pipelineRun;
     openDrawer();
   }
 </script>
@@ -115,31 +117,30 @@
         class="runs-section"
         ref="runsSection"
       >
-        <h3>Runs ({{ runs.length }})</h3>
+        <h3>Runs ({{ pipelineRuns.length }})</h3>
         <ul class="runs-list">
           <li
-            :id="run.id"
-            v-for="run in runs"
-            :key="run.id"
+            v-for="pipelineRun in pipelineRuns"
+            :key="pipelineRun.id"
             class="run-item"
           >
-            <RunCard :run="run">
+            <PipelineRunCard :run="pipelineRun">
               <div class="run-actions">
                 <button
                   type="button"
-                  @click="() => handleTraceClick(run)"
+                  @click="() => handleTraceClick(pipelineRun)"
                 >
                   <ChartBarIcon />
                   <span class="sr-only">View Trace</span>
                 </button>
                 <button
                   type="button"
-                  @click="() => handleDeleteRunClick(run.id)"
+                  @click="() => handleDeleteRunClick(pipelineRun.id)"
                 >
                   <TrashCanIcon />
                   <span class="sr-only">Delete Run</span>
                 </button>
-              </div></RunCard
+              </div></PipelineRunCard
             >
           </li>
         </ul>
@@ -147,14 +148,14 @@
     </div>
   </div>
   <SlideDrawer
-    :heading="`Trace for Run ${selectedRun?.id}`"
+    :heading="`Trace for Run ${selectedPipelineRun?.id}`"
     :drawer-open="drawerOpen"
     @drawer-closed="closeDrawer"
   >
     <div style="padding: 1rem; width: 100%">
       <TraceViewer
-        v-if="selectedRun"
-        :run-id="selectedRun.id"
+        v-if="selectedPipelineRun"
+        :run-id="selectedPipelineRun.id"
       />
       <div v-else>No run selected.</div>
     </div>

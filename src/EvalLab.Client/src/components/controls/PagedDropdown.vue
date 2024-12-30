@@ -115,6 +115,7 @@
       type="button"
       :class="{ 'selected-option': true, required }"
       @click="handleSelectedOptionClick"
+      :disabled="props.disabled"
     >
       {{ !selectedOption?.id ? placeholder : selectedOption.name }}
     </button>

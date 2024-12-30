@@ -4,7 +4,7 @@ namespace EvalLab.API.Traces;
 
 class Trace : Entity
 {
-  public string RunId { get; init; } = string.Empty;
+  public string PipelineRunId { get; init; } = string.Empty;
   public List<TraceSpan> Spans { get; init; } = null!;
 }
 

@@ -10,7 +10,7 @@ static class Extensions
   {
     var dbContext = services.BuildServiceProvider().GetRequiredService<MongoDbContext>();
 
-    var runIdIndex = Builders<Trace>.IndexKeys.Ascending(t => t.RunId);
+    var runIdIndex = Builders<Trace>.IndexKeys.Ascending(t => t.PipelineRunId);
 
     var traceRunIdIndex = new CreateIndexModel<Trace>(
       runIdIndex,

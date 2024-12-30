@@ -11,13 +11,29 @@
     [key: string]: FormField;
   };
 
-  type FormFieldDefinition = {
+  type BaseFormFieldDefinition = {
     name: string;
     label: string;
-    type: 'text' | 'textarea';
     required?: boolean;
+  };
+
+  type TextFieldDefinition = BaseFormFieldDefinition & {
+    type: 'text';
+  };
+
+  type TextAreaFieldDefinition = BaseFormFieldDefinition & {
+    type: 'textarea';
     rows?: number;
   };
+
+  type NumberFieldDefinition = BaseFormFieldDefinition & {
+    type: 'number';
+    min?: number;
+    max?: number;
+    step?: number;
+  };
+
+  type FormFieldDefinition = TextFieldDefinition | TextAreaFieldDefinition | NumberFieldDefinition;
 
   type FieldNames<T extends readonly FormFieldDefinition[]> = {
     [K in T[number]['name']]: string;
@@ -147,6 +163,19 @@
         :rows="field.rows || 10"
         :required="field.required"
       ></textarea>
+
+      <input
+        v-else-if="field.type === 'number'"
+        :ref="index === 0 ? 'firstField' : undefined"
+        v-model="formData[field.name].value"
+        type="number"
+        :id="field.name"
+        :name="field.name"
+        :min="field.min"
+        :max="field.max"
+        :step="field.step"
+        :required="field.required"
+      />
 
       <p class="error">{{ formData[field.name].error }}</p>
     </div>

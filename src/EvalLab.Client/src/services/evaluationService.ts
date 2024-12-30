@@ -1,6 +1,13 @@
 import { InjectionKey } from 'vue';
-import { Run } from './runService';
-import { createGenericService, Entity, GenericService, makeRequest, Result } from './shared';
+import { createPipelineRun, PipelineRun } from './pipelineRunService';
+import {
+  createGenericService,
+  Entity,
+  GenericService,
+  makeRequest,
+  result,
+  Result,
+} from './shared';
 
 type NewEvaluation = {
   name: string;
@@ -21,13 +28,13 @@ export type Evaluation = NewEvaluation &
     successCriteria: SuccessCriteria;
   };
 
-export type TestResult = {
-  run: Run;
+export type TestRun = {
+  pipelineRun: PipelineRun;
   passed: boolean;
 };
 
 type EvaluationsService = GenericService<NewEvaluation, Evaluation> & {
-  test: (evaluation: Evaluation) => Promise<Result<TestResult>>;
+  test: (evaluation: Evaluation) => Promise<Result<TestRun>>;
 };
 
 type EvaluationsServiceKeyType = InjectionKey<EvaluationsService>;
@@ -39,11 +46,17 @@ const BASE_URL = '/api/evaluations';
 export const evaluationsService: EvaluationsService = Object.freeze({
   ...createGenericService(BASE_URL, createEvaluation),
   test: async function (evaluation) {
-    return await makeRequest<TestResult>(`${BASE_URL}/${evaluation.id}/test`, {
+    const response = await makeRequest<TestRun>(`${BASE_URL}/${evaluation.id}/test`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(evaluation),
     });
+
+    if (response.failed) {
+      return response;
+    }
+
+    return result.success(createTestRun(response.value));
   },
 });
 
@@ -72,5 +85,13 @@ function createSuccessCriteria(data: any): SuccessCriteria {
 
   return {
     type: 'null',
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createTestRun(data: any): TestRun {
+  return {
+    pipelineRun: createPipelineRun(data.pipelineRun),
+    passed: data.passed,
   };
 }

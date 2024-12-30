@@ -1,9 +1,9 @@
 <script setup lang="ts">
   import { defineProps } from 'vue';
-  import { Run } from '../../services/pipelineService';
+  import { PipelineRun } from '../../services/pipelineRunService.ts';
   import TraceViewer from '../TraceViewer.vue';
 
-  defineProps<{ run: Run | null }>();
+  defineProps<{ run: PipelineRun | null }>();
 </script>
 
 <template>

@@ -7,4 +7,5 @@ interface IRepository<T> where T : Entity
   Task<T> CreateAsync(T entity);
   Task<bool> DeleteAsync(FilterSpecification<T> spec);
   Task<bool> UpdateAsync(FilterSpecification<T> spec, T entity);
+  Task<long> CountAsync(FilterSpecification<T> spec);
 }

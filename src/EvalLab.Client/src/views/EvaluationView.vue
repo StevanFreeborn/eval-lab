@@ -2,32 +2,18 @@
   import { computed, onMounted, ref } from 'vue';
   import { useRoute } from 'vue-router';
   import PagedDropdown from '../components/controls/PagedDropdown.vue';
+  import GenericForm from '../components/forms/GenericForm.vue';
   import ThumbsDownIcon from '../components/icons/ThumbsDownIcon.vue';
   import ThumbsUpIcon from '../components/icons/ThumbsUpIcon.vue';
-  import RunCard from '../components/RunCard.vue';
+  import PagedTable, { TableData } from '../components/PagedTable.vue';
+  import PipelineRunCard from '../components/PipelineRunCard.vue';
   import SlideDrawer from '../components/SlideDrawer.vue';
   import TraceViewer from '../components/TraceViewer.vue';
   import WaitingSpinner from '../components/WaitingSpinner.vue';
   import { useService } from '../composables/useService.ts';
-  import { Evaluation, EvaluationsServiceKey, TestResult } from '../services/evaluationService.ts';
+  import { EvaluationRun, EvaluationRunsServiceKey } from '../services/evaluationRunService.ts';
+  import { Evaluation, EvaluationsServiceKey, TestRun } from '../services/evaluationService.ts';
   import { PipelinesServiceKey } from '../services/pipelineService.ts';
-
-  // TODO: Evaluations need further defining
-  // user needs to select the target pipeline of the evaluation
-  // user needs to select the criteria for the evaluation
-  // - exact match
-  // - partial match
-  // - cosine similarity
-  // - LLM assisted => could possibly be stored "graders" or "evaluators"
-  // user needs to provide the expected output
-  // user needs to provide the output type i.e. structured or unstructured
-  // user needs to provide number of runs to evaluate
-
-  // basic info section
-  // criteria section
-  // exact match
-  // expected output unstructured
-  // expected value to match
 
   const route = useRoute();
   const evaluationId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
@@ -35,8 +21,8 @@
   const isValidEvaluation = computed(
     () =>
       evaluation.value !== undefined &&
-      !evaluation.value.input &&
-      !evaluation.value.targetPipelineId &&
+      evaluation.value.input &&
+      evaluation.value.targetPipelineId &&
       evaluation.value.successCriteria.type !== 'null',
   );
   const evaluationTestResult = ref<
@@ -45,12 +31,21 @@
       }
     | {
         status: 'success';
-        testResult: TestResult;
+        testResult: TestRun;
       }
   >({ status: 'idle' });
   const drawerOpen = ref(false);
+  const evaluationRunData = ref<TableData<EvaluationRun>>({ status: 'initial' });
+  const evaluationRunDataPage = computed(() =>
+    evaluationRunData.value.status === 'success' ? evaluationRunData.value.page.pageNumber : 1,
+  );
+  const isEditable = computed(
+    () =>
+      evaluationRunData.value.status === 'success' && evaluationRunData.value.page.totalItems === 0,
+  );
 
   const evaluationsService = useService(EvaluationsServiceKey);
+  const evaluationRunsService = useService(EvaluationRunsServiceKey);
   const pipelinesService = useService(PipelinesServiceKey);
 
   function closeDrawer() {
@@ -74,7 +69,54 @@
 
   onMounted(getEvaluation);
 
-  async function testEvaluation() {
+  async function getEvaluationRuns(pageNumber?: number, pageSize?: number) {
+    const timeout = setTimeout(() => {
+      evaluationRunData.value.status = 'loading';
+    }, 500);
+
+    try {
+      const getEvaluationRunsResult = await evaluationRunsService.getAll({ pageNumber, pageSize });
+
+      if (getEvaluationRunsResult.failed) {
+        console.error(getEvaluationRunsResult.error.message);
+        evaluationRunData.value.status = 'error';
+        return;
+      }
+
+      evaluationRunData.value = { status: 'success', page: getEvaluationRunsResult.value };
+      return getEvaluationRunsResult.value;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  onMounted(getEvaluationRuns);
+
+  function handlePreviousPage() {
+    if (evaluationRunData.value.status !== 'success') {
+      return;
+    }
+
+    getEvaluationRuns(evaluationRunData.value.page.pageNumber - 1);
+  }
+
+  function handleNextPage() {
+    if (evaluationRunData.value.status !== 'success') {
+      return;
+    }
+
+    getEvaluationRuns(evaluationRunData.value.page.pageNumber + 1);
+  }
+
+  function handleGotoPage(pageNumber: number) {
+    if (evaluationRunData.value.status !== 'success') {
+      return;
+    }
+
+    getEvaluationRuns(pageNumber);
+  }
+
+  async function handleTestEvaluationClick() {
     if (evaluation.value) {
       evaluationTestResult.value = { status: 'loading' };
 
@@ -91,16 +133,31 @@
     }
   }
 
-  async function performEvaluation() {
+  async function handlePerformEvaluationClick() {
     evaluationTestResult.value = { status: 'idle' };
     openDrawer();
+  }
 
-    // TOOD: Need to show drawer with form to collect following information
-    // - Expected proportion of runs to pass
-    // - Desired confidence level
-    // - Desired margin of error
-    // - when these are entered the form should show sample size required
-    // - user should then be able to confirm and start evaluation
+  async function handleNewEvaluationRun() {
+    closeDrawer();
+    getEvaluationRuns();
+  }
+
+  async function deleteEvaluationRun(id: string) {
+    const isSure = confirm('Are you sure you want to delete this evaluation run?');
+
+    if (!isSure) {
+      return;
+    }
+
+    const deleteEvaluationRunResult = await evaluationsService.delete(id);
+
+    if (deleteEvaluationRunResult.failed) {
+      console.error(deleteEvaluationRunResult.error.message);
+      return;
+    }
+
+    getEvaluationRuns(evaluationRunDataPage.value);
   }
 </script>
 
@@ -145,6 +202,7 @@
               v-model="evaluation.input"
               required
               rows="10"
+              :disabled="isEditable === false"
             ></textarea>
           </div>
         </div>
@@ -161,7 +219,7 @@
               placeholder="Select a pipeline"
               search-placeholder="Search pipelines"
               :required="true"
-              :disabled="true"
+              :disabled="isEditable === false"
             />
           </div>
         </div>
@@ -172,6 +230,7 @@
             <select
               v-model="evaluation.successCriteria.type"
               required
+              :disabled="isEditable === false"
             >
               <option value="null">Select Evaluation Type</option>
               <option>Unstructured Exact Match</option>
@@ -186,14 +245,16 @@
               v-model="evaluation.successCriteria.matchValue"
               required
               rows="1"
+              :disabled="isEditable === false"
             ></textarea>
           </div>
         </div>
       </div>
       <div class="actions">
         <button
+          v-if="isEditable"
           type="button"
-          @click="testEvaluation"
+          @click="handleTestEvaluationClick"
           :disabled="!isValidEvaluation"
         >
           <WaitingSpinner
@@ -205,12 +266,32 @@
         </button>
         <button
           type="button"
-          @click="performEvaluation"
+          @click="handlePerformEvaluationClick"
           :disabled="!isValidEvaluation"
         >
           Perform Evaluation
         </button>
       </div>
+    </div>
+    <div class="evaluation-runs">
+      <PagedTable
+        :data="evaluationRunData"
+        :columns="[
+          'id',
+          'status',
+          'expectedProportion',
+          'confidenceLevel',
+          'marginOfError',
+          'createdDate',
+          'updatedDate',
+        ]"
+        :get-item-key="evaluationRun => evaluationRun.id"
+        :build-edit-link="evaluationRun => `/evaluation-runs/${evaluationRun.id}`"
+        :delete-item-handler="evaluationRun => deleteEvaluationRun(evaluationRun.id)"
+        @previous-page="handlePreviousPage"
+        @goto-page="handleGotoPage"
+        @next-page="handleNextPage"
+      />
     </div>
   </div>
   <SlideDrawer
@@ -240,11 +321,57 @@
           Failed
         </div>
       </div>
-      <RunCard
-        :run="evaluationTestResult.testResult.run"
+      <PipelineRunCard
+        :run="evaluationTestResult.testResult.pipelineRun"
         style="background-color: var(--background-color)"
       />
-      <TraceViewer :run-id="evaluationTestResult.testResult.run.id" />
+      <TraceViewer :run-id="evaluationTestResult.testResult.pipelineRun.id" />
+    </div>
+    <div v-else>
+      <GenericForm
+        :fields="[
+          {
+            name: 'expectedProportion',
+            label: 'Expected Proportion of Runs to Pass (%)',
+            type: 'number',
+            required: true,
+            min: 0,
+            max: 100,
+            step: 1,
+          },
+          {
+            name: 'confidenceLevel',
+            label: 'Desired Confidence Level (%)',
+            type: 'number',
+            required: true,
+          },
+          {
+            name: 'marginOfError',
+            label: 'Desired Margin of Error (%)',
+            type: 'number',
+            required: true,
+            min: 0,
+            max: 100,
+            step: 1,
+          },
+        ]"
+        :on-submit="
+          async fields => {
+            if (!evaluation) {
+              return { failed: true, error: new Error('An evaluation is required') };
+            }
+
+            return await evaluationRunsService.create({
+              expectedProportion: parseInt(fields.expectedProportion),
+              confidenceLevel: parseInt(fields.confidenceLevel),
+              marginOfError: parseInt(fields.marginOfError),
+              evaluation: evaluation,
+            });
+          }
+        "
+        @form-submitted="handleNewEvaluationRun"
+        submit-button-label="Run Evaluation"
+      />
     </div>
   </SlideDrawer>
 </template>
@@ -363,7 +490,7 @@
     background-color: var(--secondary-background-color);
   }
 
-  .actions button:disabled {
+  *:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }

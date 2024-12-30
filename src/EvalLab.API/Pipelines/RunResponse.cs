@@ -1,1 +1,0 @@
-record RunResponse(string Output);

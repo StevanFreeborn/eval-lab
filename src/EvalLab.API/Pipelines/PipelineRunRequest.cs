@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EvalLab.API.Pipelines;
 
-record RunRequest(string PipelineId, string Input)
+record PipelineRunRequest(string PipelineId, string Input)
 {
   public string Id { get; init; } = Guid.NewGuid().ToString();
 

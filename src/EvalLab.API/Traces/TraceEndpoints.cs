@@ -26,9 +26,9 @@ static class TraceEndpoints
         .SelectMany(rs => rs.ScopeSpans)
         .SelectMany(ss => ss.Spans)
         .SelectMany(s => s.Attributes)
-        .Where(a => a.Key == Run.RunAttribute)
+        .Where(a => a.Key == PipelineRun.RunAttribute)
         .Select(a => a.Value.StringValue)
-        .Select(runId => runId.Split(Run.RunIdPrefix)[1])
+        .Select(runId => runId.Split(PipelineRun.RunIdPrefix)[1])
         .Distinct()
         .ToArray();
 
@@ -44,7 +44,7 @@ static class TraceEndpoints
 
       var trace = traceData.ToTrace(runIds[0]);
 
-      var existingTrace = await repo.GetAsync(FilterSpecification<Trace>.From(t => t.RunId == trace.RunId));
+      var existingTrace = await repo.GetAsync(FilterSpecification<Trace>.From(t => t.PipelineRunId == trace.PipelineRunId));
 
       if (existingTrace is not null)
       {
@@ -60,7 +60,7 @@ static class TraceEndpoints
 
     group.MapGet("{runId}", async (string runId, [FromServices] IRepository<Trace> repo) =>
     {
-      var trace = await repo.GetAsync(FilterSpecification<Trace>.From(t => t.RunId == runId));
+      var trace = await repo.GetAsync(FilterSpecification<Trace>.From(t => t.PipelineRunId == runId));
       return trace is not null ? Results.Ok(TraceDto.From(trace)) : Results.NotFound();
     });
 

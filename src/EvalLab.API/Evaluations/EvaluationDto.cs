@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace EvalLab.API.Evaluations;
 
 record EvaluationDto(
@@ -22,6 +24,33 @@ record EvaluationDto(
     evaluation.UpdatedDate
   )
   { }
+
+  public bool TryValidate(out List<ValidationResult> results)
+  {
+    results = [];
+
+    if (string.IsNullOrWhiteSpace(Name))
+    {
+      results.Add(new ValidationResult("Name is required", [nameof(Name)]));
+    }
+
+    if (string.IsNullOrWhiteSpace(Input))
+    {
+      results.Add(new ValidationResult("Input is required", [nameof(Input)]));
+    }
+
+    if (string.IsNullOrWhiteSpace(TargetPipelineId))
+    {
+      results.Add(new ValidationResult("TargetPipelineId is required", [nameof(TargetPipelineId)]));
+    }
+
+    if (SuccessCriteria is NullSuccessCriteria)
+    {
+      results.Add(new ValidationResult("SuccessCriteria is required", [nameof(SuccessCriteria)]));
+    }
+
+    return results.Count is 0;
+  }
 
   public static EvaluationDto From(Evaluation evaluation) => new(evaluation);
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-  import { Run } from '../services/runService.ts';
+  import { PipelineRun } from '../services/pipelineRunService.ts';
 
   defineProps<{
-    run: Run;
+    run: PipelineRun;
   }>();
 </script>
 

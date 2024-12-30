@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { onMounted, ref, useTemplateRef } from 'vue';
+  import { computed, onMounted, ref, useTemplateRef } from 'vue';
   import PagedTable, { TableData } from '../components/PagedTable.vue';
   import SlideDrawer from '../components/SlideDrawer.vue';
   import AddButton from '../components/buttons/AddButton.vue';
@@ -14,6 +14,9 @@
   const addForm = useTemplateRef<AddEvaluationFormComponent>('addForm');
 
   const data = ref<TableData<Evaluation>>({ status: 'initial' });
+  const currentPage = computed(() =>
+    data.value.status === 'success' ? data.value.page.pageNumber : 1,
+  );
 
   const evaluationsService = useService(EvaluationsServiceKey);
 
@@ -71,7 +74,7 @@
       return;
     }
 
-    getEvaluations();
+    getEvaluations(currentPage.value);
   }
 
   function handlePreviousPage() {

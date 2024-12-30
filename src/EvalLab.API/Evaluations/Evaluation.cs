@@ -11,7 +11,7 @@ class Evaluation : Entity
   public string Input { get; init; } = string.Empty;
   public SuccessCriteria SuccessCriteria { get; init; } = new NullSuccessCriteria();
 
-  public async Task<TestResult> RunAsync(Pipeline pipeline, HttpClient client)
+  public async Task<(bool Passed, PipelineRun PipelineRun)> RunAsync(Pipeline pipeline, HttpClient client)
   {
     var runResult = await pipeline.RunAsync(client, new(pipeline.Id, Input));
 
@@ -22,10 +22,10 @@ class Evaluation : Entity
 
     var passed = SuccessCriteria.IsSatisfiedBy(runResult.Value.Output);
 
-    return new TestResult(runResult.Value, passed);
+    return (passed, runResult.Value);
   }
 
-  public async Task<TestResult> RunAsync(IRepository<Pipeline> pipelineRepo, HttpClient client)
+  public async Task<(bool Passed, PipelineRun PipelineRun)> RunAsync(IRepository<Pipeline> pipelineRepo, HttpClient client)
   {
     var pipeline = await pipelineRepo.GetAsync(FilterSpecification<Pipeline>.From(p => p.Id == TargetPipelineId));
 
@@ -38,4 +38,4 @@ class Evaluation : Entity
   }
 }
 
-record TestResult(Run Run, bool Passed);
+record TestResult(PipelineRun Run, bool Passed);

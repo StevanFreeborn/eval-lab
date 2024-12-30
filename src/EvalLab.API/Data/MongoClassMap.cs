@@ -27,6 +27,18 @@ static class MongoClassMap
       cm.SetIgnoreExtraElements(true);
     });
 
+    BsonClassMap.TryRegisterClassMap<EvaluationRun>(cm =>
+    {
+      cm.AutoMap();
+      cm.SetIgnoreExtraElements(true);
+    });
+
+    BsonClassMap.TryRegisterClassMap<TestRun>(cm =>
+    {
+      cm.AutoMap();
+      cm.SetIgnoreExtraElements(true);
+    });
+
     BsonClassMap.TryRegisterClassMap<SuccessCriteria>(cm =>
     {
       cm.AutoMap();
@@ -52,7 +64,7 @@ static class MongoClassMap
       cm.SetIgnoreExtraElements(true);
     });
 
-    BsonClassMap.TryRegisterClassMap<Run>(cm =>
+    BsonClassMap.TryRegisterClassMap<PipelineRun>(cm =>
     {
       cm.AutoMap();
       cm.SetIgnoreExtraElements(true);

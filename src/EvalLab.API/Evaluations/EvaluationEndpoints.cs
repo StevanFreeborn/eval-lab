@@ -53,9 +53,15 @@ static class EvaluationEndpoints
       [FromBody] EvaluationDto dto,
       [FromServices] IRepository<Evaluation> evaluationRepo,
       [FromServices] IRepository<Pipeline> pipelineRepo,
+      [FromServices] IRepository<PipelineRun> pipelineRunRepo,
       [FromServices] HttpClient client
     ) =>
     {
+      if (dto.TryValidate(out var results) is false)
+      {
+        return Results.ValidationProblem(results.ToErrors());
+      }
+
       var evaluation = dto.ToEvaluation();
       var pipeline = await pipelineRepo.GetAsync(FilterSpecification<Pipeline>.From(p => p.Id == evaluation.TargetPipelineId));
 
@@ -64,9 +70,11 @@ static class EvaluationEndpoints
         return Results.BadRequest("Invalid pipeline");
       }
 
-      var testResult = await evaluation.RunAsync(pipeline, client);
+      var (passed, pipelineRun) = await evaluation.RunAsync(pipeline, client);
 
-      return Results.Ok(testResult);
+      await pipelineRunRepo.CreateAsync(pipelineRun);
+
+      return Results.Ok(TestRunDto.From(pipelineRun, passed));
     });
 
     return app;

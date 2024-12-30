@@ -8,16 +8,16 @@ class Pipeline : Entity
   public string Name { get; init; } = string.Empty;
   public string Description { get; init; } = string.Empty;
   public string Endpoint { get; init; } = string.Empty;
-  public List<Run> Runs { get; init; } = [];
+  public List<PipelineRun> Runs { get; init; } = [];
 
-  public async Task<Result<Run>> RunAsync(HttpClient client, RunRequest request)
+  public async Task<Result<PipelineRun>> RunAsync(HttpClient client, PipelineRunRequest request)
   {
     try
     {
       var response = await client.PostAsJsonAsync(Endpoint, request);
-      var output = await response.Content.ReadFromJsonAsync<RunResponse>();
+      var output = await response.Content.ReadFromJsonAsync<PipelineRunResponse>();
 
-      return Result<Run>.Success(new Run()
+      return Result<PipelineRun>.Success(new PipelineRun()
       {
         PipelineId = request.PipelineId,
         Id = request.Id,
@@ -27,7 +27,7 @@ class Pipeline : Entity
     }
     catch (Exception ex)
     {
-      return Result<Run>.Failure(ex);
+      return Result<PipelineRun>.Failure(ex);
     }
   }
 }

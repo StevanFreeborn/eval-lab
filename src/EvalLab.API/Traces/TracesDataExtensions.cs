@@ -25,7 +25,7 @@ static class TracesDataExtensions
       .SelectMany(ss => ss.Spans)
       .ToArray();
 
-    return new() { RunId = runId, Spans = [.. spans.Select(s => s.ToTraceSpan())] };
+    return new() { PipelineRunId = runId, Spans = [.. spans.Select(s => s.ToTraceSpan())] };
   }
 
   private static TraceSpan ToTraceSpan(this Span span)

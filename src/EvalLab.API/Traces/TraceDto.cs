@@ -2,19 +2,19 @@ namespace EvalLab.API.Traces;
 
 record TraceDto(
   string Id,
-  string RunId,
+  string PipelineRunId,
   List<SpanDto> Spans,
   DateTime CreatedDate,
   DateTime UpdatedDate
 )
 {
-  public string Name => $"Run {RunId}";
+  public string Name => $"Run {PipelineRunId}";
   public ulong Duration => GetDuration();
   public ulong Start => Spans.Min(span => span.Start);
   public ulong End => Spans.Max(span => span.End);
   public static TraceDto From(Trace trace) => new(
     trace.Id,
-    trace.RunId,
+    trace.PipelineRunId,
     [.. trace.Spans.Select(SpanDto.From)],
     trace.CreatedDate,
     trace.UpdatedDate

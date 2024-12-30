@@ -17,7 +17,7 @@ static class DemoEndpoints
   {
     var group = app.MapGroup("/demo");
 
-    group.MapPost("anthropic", async ([FromBody] RunRequest dto, [FromServices] IAnthropicApiClient client) =>
+    group.MapPost("anthropic", async ([FromBody] PipelineRunRequest dto, [FromServices] IAnthropicApiClient client) =>
     {
       using var activity = Activity.Current?.Source.StartActivity("RunAnthropic");
       activity?.SetTag("evallab.run", $"run-{dto.Id}");
@@ -44,7 +44,7 @@ static class DemoEndpoints
 
       activity?.SetTag("output", output);
 
-      return Results.Ok(new RunResponse(output));
+      return Results.Ok(new PipelineRunResponse(output));
     });
 
     return app;

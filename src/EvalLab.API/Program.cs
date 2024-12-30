@@ -23,11 +23,16 @@ builder.AddServiceDefaults();
 
 builder.AddMongoDBClient("mongodb");
 
-builder.Services.AddSingleton<MongoDbContext>();
+await builder.Services.AddSingleton<MongoDbContext>().AddIndexes();
 builder.Services.AddScoped<IRepository<Pipeline>, MongoPipelineRepository>();
-builder.Services.AddScoped<IRepository<Run>, MongoRunRepository>();
+builder.Services.AddScoped<IRepository<PipelineRun>, MongoPipelineRunRepository>();
 builder.Services.AddScoped<IRepository<Evaluation>, MongoEvaluationRepository>();
+builder.Services.AddScoped<IRepository<EvaluationRun>, MongoEvaluationRunRepository>();
 builder.Services.AddScoped<IRepository<Trace>, MongoTraceRepository>();
+
+builder.Services.AddSingleton<ITestRunQueue, TestRunQueue>();
+builder.Services.AddSingleton<ITaskRunProcessor, TaskRunProcessor>();
+builder.Services.AddHostedService<TestRunQueueService>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IAnthropicApiClient>(sp =>
@@ -66,12 +71,12 @@ app.MapOpenApi();
 app.MapDefaultEndpoints();
 
 app.MapEvaluationEndpoints();
+app.MapEvaluationRunEndpoints();
 
 app.MapTraceEndpoints();
 
 app.MapPipelineEndpoints();
-
-app.MapRunEndpoints();
+app.MapPipelineRunEndpoints();
 
 app.MapDemoEndpoints();
 

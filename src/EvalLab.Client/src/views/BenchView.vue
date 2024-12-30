@@ -6,16 +6,16 @@
   import TraceTab from '../components/tabs/TraceTab.vue';
   import WaitingSpinner from '../components/WaitingSpinner.vue';
   import { useService } from '../composables/useService.ts';
+  import { PipelineRun, PipelineRunsServiceKey } from '../services/pipelineRunService.ts';
   import { PipelinesServiceKey } from '../services/pipelineService.ts';
-  import { Run, RunsServiceKey } from '../services/runService.ts';
 
   const selectedPipeline = ref<Option>({ id: '', name: '' });
   const input = ref('');
   const isRunning = ref(false);
-  const run = ref<Run | null>(null);
+  const pipelineRun = ref<PipelineRun | null>(null);
 
   const pipelinesService = useService(PipelinesServiceKey);
-  const runsService = useService(RunsServiceKey);
+  const pipelineRunsService = useService(PipelineRunsServiceKey);
 
   async function handleSubmit() {
     if (!selectedPipeline.value.id) {
@@ -31,7 +31,7 @@
     isRunning.value = true;
 
     try {
-      const result = await runsService.create({
+      const result = await pipelineRunsService.create({
         pipelineId: selectedPipeline.value.id,
         input: input.value,
       });
@@ -41,7 +41,7 @@
         return;
       }
 
-      run.value = result.value;
+      pipelineRun.value = result.value;
     } finally {
       isRunning.value = false;
     }
@@ -166,7 +166,7 @@
         <component
           :is="tab.component"
           v-bind="{
-            run: run,
+            run: pipelineRun,
           }"
         />
       </div>
