@@ -1,4 +1,3 @@
-using EvalLab.API.Evaluations;
 using EvalLab.API.Pipelines;
 
 record TestRunDto(PipelineRunDto PipelineRun, bool Passed)

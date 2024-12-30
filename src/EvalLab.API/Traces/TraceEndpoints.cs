@@ -6,7 +6,6 @@ using EvalLab.API.Pipelines;
 using Microsoft.AspNetCore.Mvc;
 
 using OpenTelemetry;
-using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
 
 namespace EvalLab.API.Traces;

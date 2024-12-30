@@ -2,8 +2,6 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-using EvalLab.API.Pipelines;
-
 using Google.Protobuf;
 
 using OpenTelemetry.Proto.Common.V1;
