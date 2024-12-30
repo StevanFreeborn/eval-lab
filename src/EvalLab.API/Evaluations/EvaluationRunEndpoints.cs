@@ -78,6 +78,8 @@ static class EvaluationRunEndpoints
       return Results.Ok(PageDto<EvaluationRunDto>.FromPage(page, EvaluationRunDto.From));
     });
 
+
+    // TODO: include test runs for a given evaluation run
     group.MapGet("{id}", async (string id, [FromServices] IRepository<EvaluationRun> repo) =>
     {
       var evaluationRun = await repo.GetAsync(FilterSpecification<EvaluationRun>.From(er => er.Id == id));
