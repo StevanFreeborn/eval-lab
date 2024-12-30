@@ -231,7 +231,6 @@
     background-color: var(--background-color);
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;
-    cursor: pointer;
   }
 
   .option {
@@ -293,7 +292,6 @@
     padding: 0.25rem 0.5rem;
     border: 1px solid var(--text-color);
     border-radius: 999px;
-    cursor: pointer;
     width: max-content;
     display: flex;
     align-items: center;

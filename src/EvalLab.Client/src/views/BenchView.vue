@@ -242,7 +242,6 @@
     padding: 0.5rem;
     background-color: var(--background-color);
     border: 1px solid var(--secondary-background-color);
-    cursor: pointer;
     border-radius: 0.25rem;
   }
 

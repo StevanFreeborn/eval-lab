@@ -75,7 +75,6 @@
     justify-content: center;
     padding: 0.25rem;
     margin: 0.5rem;
-    cursor: pointer;
 
     & svg {
       width: 1rem;

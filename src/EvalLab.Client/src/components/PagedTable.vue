@@ -197,7 +197,6 @@
     border: none;
     padding: 0.25rem 0.25rem;
     border-radius: 0.25rem;
-    cursor: pointer;
     display: flex;
     align-items: center;
     gap: 0.25rem;

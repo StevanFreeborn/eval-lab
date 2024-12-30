@@ -25,7 +25,6 @@
     border: 1px solid var(--text-color);
     border-radius: 0.25rem;
     padding: 0.25rem;
-    cursor: pointer;
   }
 
   svg {

@@ -255,7 +255,6 @@
     border-radius: 0.375rem;
     font-size: 0.875rem;
     font-weight: bold;
-    cursor: pointer;
   }
 
   .run-actions button svg {

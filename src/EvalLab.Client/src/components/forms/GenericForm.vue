@@ -280,7 +280,6 @@
     padding: 0.25rem 0.5rem;
     border: 1px solid var(--text-color);
     border-radius: 0.25rem;
-    cursor: pointer;
     width: max-content;
     display: flex;
     align-items: center;
