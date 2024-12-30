@@ -1,5 +1,14 @@
 <script setup lang="ts" generic="T">
-  import { computed, defineModel, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue';
+  import {
+    computed,
+    defineModel,
+    nextTick,
+    onMounted,
+    onUnmounted,
+    ref,
+    useTemplateRef,
+    watch,
+  } from 'vue';
   import { GetAllParams, Page, Result } from '../../services/shared.ts';
   import { createDebouncedHandler } from '../../shared/utils';
   import WaitingSpinner from '../WaitingSpinner.vue';
@@ -82,7 +91,17 @@
 
   const selectedOptionRef = useTemplateRef<HTMLButtonElement | null>('selectedOptionRef');
   const filterInputRef = useTemplateRef<HTMLInputElement | null>('filter');
+  const dropdownRef = useTemplateRef<HTMLDivElement | null>('dropdownRef');
   const menuOpen = ref(false);
+
+  function handleClickOutsideMenu(e: MouseEvent) {
+    if (dropdownRef.value && menuOpen.value && !dropdownRef.value.contains(e.target as Node)) {
+      menuOpen.value = false;
+    }
+  }
+
+  onMounted(() => document.addEventListener('click', handleClickOutsideMenu));
+  onUnmounted(() => document.removeEventListener('click', handleClickOutsideMenu));
 
   watch(menuOpen, async value => {
     if (value) {
@@ -109,7 +128,10 @@
 </script>
 
 <template>
-  <div class="dropdown">
+  <div
+    ref="dropdownRef"
+    class="dropdown"
+  >
     <button
       ref="selectedOptionRef"
       type="button"
@@ -223,11 +245,6 @@
 
   .selected-option:focus {
     outline: -webkit-focus-ring-color auto 1px;
-  }
-
-  .selected-option:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
 
   .required {

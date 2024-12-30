@@ -75,9 +75,9 @@
       height="3rem"
       width="3rem"
     />
-    <div v-else-if="data.status === 'error'">Failed to load evaluations</div>
+    <div v-else-if="data.status === 'error'">Failed to load data</div>
     <div v-else-if="data.status === 'success'">
-      <div v-if="data.page.items.length === 0">No evaluations found</div>
+      <div v-if="data.page.items.length === 0">No data found</div>
       <div v-else>
         <div class="pager">
           <button
@@ -203,11 +203,6 @@
     gap: 0.25rem;
   }
 
-  .pager button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
   .pager button svg {
     width: 1rem;
     height: 1rem;
@@ -226,22 +221,6 @@
     background-color: var(--background-color);
     border-radius: 0.25rem;
     padding: 0.125rem;
-  }
-
-  .pager input:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .pager input::-webkit-outer-spin-button,
-  .pager input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  .pager input[type='number'] {
-    -moz-appearance: textfield;
-    appearance: textfield;
   }
 
   table {

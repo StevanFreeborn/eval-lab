@@ -33,7 +33,16 @@
     step?: number;
   };
 
-  type FormFieldDefinition = TextFieldDefinition | TextAreaFieldDefinition | NumberFieldDefinition;
+  type SelectFieldDefinition = BaseFormFieldDefinition & {
+    type: 'select';
+    options: { label: string; value: string }[];
+  };
+
+  type FormFieldDefinition =
+    | TextFieldDefinition
+    | TextAreaFieldDefinition
+    | NumberFieldDefinition
+    | SelectFieldDefinition;
 
   type FieldNames<T extends readonly FormFieldDefinition[]> = {
     [K in T[number]['name']]: string;
@@ -101,6 +110,27 @@
       if (field.required && !formData.value[field.name].value) {
         formData.value[field.name].error = `${field.label.toLowerCase()} is required`;
         hasErrors = true;
+      }
+
+      if (field.type === 'number') {
+        const value = parseFloat(formData.value[field.name].value);
+
+        if (Number.isNaN(value)) {
+          formData.value[field.name].error = 'Please enter a valid number';
+          hasErrors = true;
+        }
+
+        if (field.min !== undefined && value < field.min) {
+          formData.value[field.name].error =
+            `Please enter a number greater than or equal to ${field.min}`;
+          hasErrors = true;
+        }
+
+        if (field.max !== undefined && value > field.max) {
+          formData.value[field.name].error =
+            `Please enter a number less than or equal to ${field.max}`;
+          hasErrors = true;
+        }
       }
     }
 
@@ -177,6 +207,23 @@
         :required="field.required"
       />
 
+      <select
+        v-else-if="field.type === 'select'"
+        :ref="index === 0 ? 'firstField' : undefined"
+        v-model="formData[field.name].value"
+        :id="field.name"
+        :name="field.name"
+        :required="field.required"
+      >
+        <option
+          v-for="option in field.options"
+          :key="option.value"
+          :value="option.value"
+        >
+          {{ option.label }}
+        </option>
+      </select>
+
       <p class="error">{{ formData[field.name].error }}</p>
     </div>
 
@@ -238,10 +285,6 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
-  }
-
-  input:required {
-    border-left: 1px solid red;
   }
 
   .error {

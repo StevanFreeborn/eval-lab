@@ -1,3 +1,4 @@
+using EvalLab.API.Evaluations;
 using EvalLab.API.Traces;
 
 using MongoDB.Driver;
@@ -10,13 +11,20 @@ static class Extensions
   {
     var dbContext = services.BuildServiceProvider().GetRequiredService<MongoDbContext>();
 
-    var runIdIndex = Builders<Trace>.IndexKeys.Ascending(t => t.PipelineRunId);
-
-    var traceRunIdIndex = new CreateIndexModel<Trace>(
-      runIdIndex,
-      new() { Name = "run_id_index" }
+    var traceByPipelineRunIdIndex = Builders<Trace>.IndexKeys.Ascending(t => t.PipelineRunId);
+    var traceByPipelineRunIdIndexModel = new CreateIndexModel<Trace>(
+      traceByPipelineRunIdIndex,
+      new() { Name = "pipeline_run_id_index" }
     );
 
-    await dbContext.GetCollection<Trace>().Indexes.CreateOneAsync(traceRunIdIndex);
+    await dbContext.GetCollection<Trace>().Indexes.CreateOneAsync(traceByPipelineRunIdIndexModel);
+
+    var evaluationRunByEvaluationIdIndex = Builders<EvaluationRun>.IndexKeys.Ascending(er => er.EvaluationId);
+    var evaluationRunByEvaluationIdIndexModel = new CreateIndexModel<EvaluationRun>(
+      evaluationRunByEvaluationIdIndex,
+      new() { Name = "evaluation_id_index" }
+    );
+
+    await dbContext.GetCollection<EvaluationRun>().Indexes.CreateOneAsync(evaluationRunByEvaluationIdIndexModel);
   }
 }

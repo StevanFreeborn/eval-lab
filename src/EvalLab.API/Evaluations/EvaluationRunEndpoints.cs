@@ -60,13 +60,21 @@ static class EvaluationRunEndpoints
       async (
         [FromServices] IRepository<EvaluationRun> repo,
         [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 50
+        [FromQuery] int pageSize = 50,
+        [FromQuery] string? evaluationId = null
       ) =>
     {
+      var filterSpec = FilterSpecification<EvaluationRun>.All;
+
+      if (evaluationId is not null)
+      {
+        filterSpec = filterSpec.And(FilterSpecification<EvaluationRun>.From(er => er.EvaluationId == evaluationId));
+      }
+
       var page = await repo.GetAsync(
         pageNumber,
         pageSize,
-        FilterSpecification<EvaluationRun>.All,
+        filterSpec,
         SortSpecification<EvaluationRun>.SortByDesc(er => er.CreatedDate)
       );
 

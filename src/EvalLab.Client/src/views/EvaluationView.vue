@@ -75,7 +75,11 @@
     }, 500);
 
     try {
-      const getEvaluationRunsResult = await evaluationRunsService.getAll({ pageNumber, pageSize });
+      const getEvaluationRunsResult = await evaluationRunsService.getAll({
+        pageNumber,
+        pageSize,
+        additionalParams: { evaluationId },
+      });
 
       if (getEvaluationRunsResult.failed) {
         console.error(getEvaluationRunsResult.error.message);
@@ -342,8 +346,15 @@
           {
             name: 'confidenceLevel',
             label: 'Desired Confidence Level (%)',
-            type: 'number',
+            type: 'select',
             required: true,
+            options: [
+              { value: '80', label: '80%' },
+              { value: '85', label: '85%' },
+              { value: '90', label: '90%' },
+              { value: '95', label: '95%' },
+              { value: '99', label: '99%' },
+            ],
           },
           {
             name: 'marginOfError',
@@ -458,24 +469,6 @@
     min-height: 1.75rem;
   }
 
-  textarea:required {
-    border-left: 1px solid red;
-  }
-
-  select {
-    background-color: var(--background-color);
-    color: inherit;
-    font-size: inherit;
-    font-family: inherit;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    border: none;
-  }
-
-  select:required {
-    border-left: 1px solid red;
-  }
-
   .actions {
     display: flex;
     gap: 1rem;
@@ -488,11 +481,6 @@
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;
     background-color: var(--secondary-background-color);
-  }
-
-  *:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
 
   .test-result-container {

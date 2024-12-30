@@ -217,15 +217,6 @@
     flex: 1;
   }
 
-  textarea:required {
-    border-left: 1px solid red;
-  }
-
-  textarea:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-
   .run-button {
     display: flex;
     align-items: center;
@@ -234,11 +225,6 @@
     border: 1px solid var(--text-color);
     border-radius: 0.25rem;
     align-self: flex-start;
-  }
-
-  .run-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
 
   .run-button > svg {
