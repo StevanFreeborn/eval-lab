@@ -78,7 +78,3 @@ app.MapPipelineRunEndpoints();
 app.MapDemoEndpoints();
 
 app.Run();
-
-
-
-

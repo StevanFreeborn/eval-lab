@@ -96,4 +96,3 @@ static class TracesDataExtensions
     }
   }
 }
-
