@@ -77,4 +77,10 @@ abstract class MongoRepository<T>(MongoDbContext context) : IRepository<T> where
   {
     return await _collection.CountDocumentsAsync(spec.ToExpression());
   }
+
+  public virtual async Task<bool> DeleteManyAsync(FilterSpecification<T> spec)
+  {
+    var result = await _collection.DeleteManyAsync(spec.ToExpression());
+    return result.DeletedCount > 0;
+  }
 }

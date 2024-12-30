@@ -27,8 +27,8 @@
     mapOption: (item: T) => Option;
     placeholder: string;
     searchPlaceholder: string;
-    required: boolean;
-    disabled: boolean;
+    required?: boolean;
+    disabled?: boolean;
     pageSize?: number;
     sortBy?: keyof T;
     sortOrder?: 'asc' | 'desc';

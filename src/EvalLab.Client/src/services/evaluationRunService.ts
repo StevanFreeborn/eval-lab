@@ -14,6 +14,7 @@ export type EvaluationRun = Omit<NewEvaluationRun, 'evaluation'> &
     evaluationId: string;
     sampleSize: number;
     status: string;
+    successRate: number | null;
   };
 
 type EvaluationRunsService = GenericService<NewEvaluationRun, EvaluationRun>;
@@ -40,6 +41,7 @@ function createEvaluationRun(data: any): EvaluationRun {
     evaluationId: data.evaluationId,
     sampleSize: data.sampleSize,
     status: data.status,
+    successRate: data.successRate,
     createdDate: new Date(data.createdDate),
     updatedDate: new Date(data.updatedDate),
   };

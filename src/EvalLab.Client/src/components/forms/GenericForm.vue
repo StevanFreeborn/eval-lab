@@ -15,6 +15,7 @@
     name: string;
     label: string;
     required?: boolean;
+    default?: string;
   };
 
   type TextFieldDefinition = BaseFormFieldDefinition & {
@@ -77,8 +78,9 @@
     (() => {
       const data: FormData = {};
       props.fields.forEach(field => {
+        console.log(field.default);
         data[field.name] = {
-          value: '',
+          value: field.default ?? '',
           error: '',
         };
       });
@@ -108,7 +110,7 @@
 
     for (const field of props.fields) {
       if (field.required && !formData.value[field.name].value) {
-        formData.value[field.name].error = `${field.label.toLowerCase()} is required`;
+        formData.value[field.name].error = `${field.label} is required`;
         hasErrors = true;
       }
 

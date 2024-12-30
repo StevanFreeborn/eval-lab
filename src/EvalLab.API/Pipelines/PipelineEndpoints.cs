@@ -34,7 +34,6 @@ static class PipelineEndpoints
         [FromQuery] string? name = null
       ) =>
     {
-
       var spec = FilterSpecification<Pipeline>.All;
 
       if (name is not null)
@@ -54,9 +53,15 @@ static class PipelineEndpoints
       return pipeline is not null ? Results.Ok(PipelineDto.From(pipeline)) : Results.NotFound();
     });
 
-    group.MapDelete("{id}", async (string id, [FromServices] IRepository<Pipeline> repo) =>
+    group.MapDelete("{id}", async (string id, [FromServices] IRepository<Pipeline> pipelineRepo, [FromServices] IRepository<PipelineRun> pipelineRunRepo) =>
     {
-      var isDeleted = await repo.DeleteAsync(FilterSpecification<Pipeline>.From(p => p.Id == id));
+      var isDeleted = await pipelineRepo.DeleteAsync(FilterSpecification<Pipeline>.From(p => p.Id == id));
+
+      if (isDeleted)
+      {
+        await pipelineRunRepo.DeleteManyAsync(FilterSpecification<PipelineRun>.From(pr => pr.PipelineId == id));
+      }
+
       return isDeleted ? Results.NoContent() : Results.NotFound();
     });
 

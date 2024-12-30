@@ -42,9 +42,15 @@ static class EvaluationEndpoints
       return evaluation is not null ? Results.Ok(EvaluationDto.From(evaluation)) : Results.NotFound();
     });
 
-    group.MapDelete("{id}", async (string id, [FromServices] IRepository<Evaluation> repo) =>
+    group.MapDelete("{id}", async (string id, [FromServices] IRepository<Evaluation> evaluationRepo, IRepository<EvaluationRun> evaluationRunRepo) =>
     {
-      var isDeleted = await repo.DeleteAsync(FilterSpecification<Evaluation>.From(e => e.Id == id));
+      var isDeleted = await evaluationRepo.DeleteAsync(FilterSpecification<Evaluation>.From(e => e.Id == id));
+
+      if (isDeleted)
+      {
+        await evaluationRunRepo.DeleteManyAsync(FilterSpecification<EvaluationRun>.From(er => er.EvaluationId == id));
+      }
+
       return isDeleted ? Results.NoContent() : Results.NotFound();
     });
 

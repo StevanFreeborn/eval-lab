@@ -20,6 +20,7 @@ class EvaluationRun : Entity
   public int SampleSize { get; init; }
   public List<TestRun> TestRuns { get; init; } = [];
   public string Status => TestRuns.Count == SampleSize ? "Completed" : "Running";
+  public decimal? SuccessRate => Status == "Completed" ? Math.Round((decimal)TestRuns.Count(tr => tr.Passed) / SampleSize, 2) : null;
 
   public EvaluationRun(
     string evaluationId,
@@ -48,7 +49,9 @@ class EvaluationRun : Entity
     var numerator = z * z * p * q;
     var denominator = e * e;
 
-    return (int)Math.Ceiling((double)(numerator / denominator));
+    var result = (int)Math.Ceiling((double)(numerator / denominator));
+
+    return Math.Max(result, 1);
   }
 }
 

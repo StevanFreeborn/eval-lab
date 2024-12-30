@@ -20,6 +20,10 @@ export const router = createRouter({
           component: () => import('./views/EvaluationView.vue'),
         },
         {
+          path: 'evaluation-runs/:id',
+          component: () => import('./views/EvaluationRunView.vue'),
+        },
+        {
           path: 'pipelines',
           component: () => import('./views/PipelinesView.vue'),
         },

@@ -17,7 +17,7 @@ static class EvaluationRunEndpoints
         [FromBody] AddEvaluationRunDto dto,
         [FromServices] IRepository<Evaluation> evaluationRepo,
         [FromServices] IRepository<EvaluationRun> evaluationRunRepo,
-        [FromServices] ITestRunQueue testRunQueue
+        [FromServices] IEvaluationRunQueue evaluationRunQueue
       ) =>
     {
       if (dto.TryValidate(out var results) is false)
@@ -47,10 +47,7 @@ static class EvaluationRunEndpoints
 
       await evaluationRunRepo.CreateAsync(evaluationRun);
 
-      foreach (var num in Enumerable.Range(0, evaluationRun.SampleSize))
-      {
-        await testRunQueue.EnqueueAsync(new(evaluationRun.Id, num));
-      }
+      await evaluationRunQueue.EnqueueAsync(evaluationRun);
 
       return Results.Created($"/evaluations/runs/{evaluationRun.Id}", EvaluationRunDto.From(evaluationRun));
     });
@@ -85,6 +82,12 @@ static class EvaluationRunEndpoints
     {
       var evaluationRun = await repo.GetAsync(FilterSpecification<EvaluationRun>.From(er => er.Id == id));
       return evaluationRun is not null ? Results.Ok(EvaluationRunDto.From(evaluationRun)) : Results.NotFound();
+    });
+
+    group.MapDelete("{id}", async (string id, [FromServices] IRepository<EvaluationRun> repo) =>
+    {
+      var isDeleted = await repo.DeleteAsync(FilterSpecification<EvaluationRun>.From(er => er.Id == id));
+      return isDeleted ? Results.NoContent() : Results.NotFound();
     });
 
     return app;

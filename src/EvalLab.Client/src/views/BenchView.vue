@@ -106,7 +106,6 @@
           placeholder="Select a pipeline"
           search-placeholder="Search pipelines"
           :required="true"
-          :disabled="true"
         />
         <textarea
           :disabled="!selectedPipeline.id ? true : false"

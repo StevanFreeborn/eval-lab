@@ -154,7 +154,7 @@
       return;
     }
 
-    const deleteEvaluationRunResult = await evaluationsService.delete(id);
+    const deleteEvaluationRunResult = await evaluationRunsService.delete(id);
 
     if (deleteEvaluationRunResult.failed) {
       console.error(deleteEvaluationRunResult.error.message);
@@ -283,9 +283,11 @@
         :columns="[
           'id',
           'status',
+          'successRate',
           'expectedProportion',
           'confidenceLevel',
           'marginOfError',
+          'sampleSize',
           'createdDate',
           'updatedDate',
         ]"
@@ -342,6 +344,7 @@
             min: 0,
             max: 100,
             step: 1,
+            default: '50',
           },
           {
             name: 'confidenceLevel',
@@ -349,12 +352,13 @@
             type: 'select',
             required: true,
             options: [
-              { value: '80', label: '80%' },
-              { value: '85', label: '85%' },
-              { value: '90', label: '90%' },
-              { value: '95', label: '95%' },
-              { value: '99', label: '99%' },
+              { value: '80', label: '80' },
+              { value: '85', label: '85' },
+              { value: '90', label: '90' },
+              { value: '95', label: '95' },
+              { value: '99', label: '99' },
             ],
+            default: '95',
           },
           {
             name: 'marginOfError',
@@ -364,6 +368,7 @@
             min: 0,
             max: 100,
             step: 1,
+            default: '5',
           },
         ]"
         :on-submit="

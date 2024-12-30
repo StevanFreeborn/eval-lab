@@ -9,6 +9,7 @@ record EvaluationRunDto
   public int ConfidenceLevel { get; init; }
   public int MarginOfError { get; init; }
   public int SampleSize { get; init; }
+  public string? SuccessRate { get; init; }
   public string Status { get; init; } = string.Empty;
   public DateTime CreatedDate { get; init; } = DateTime.UtcNow;
   public DateTime UpdatedDate { get; init; } = DateTime.UtcNow;
@@ -22,6 +23,7 @@ record EvaluationRunDto
     MarginOfError = (int)(evaluationRun.MarginOfError * 100),
     SampleSize = evaluationRun.SampleSize,
     Status = evaluationRun.Status,
+    SuccessRate = (evaluationRun.SuccessRate * 100)?.ToString("0.00"),
     CreatedDate = evaluationRun.CreatedDate,
     UpdatedDate = evaluationRun.UpdatedDate
   };

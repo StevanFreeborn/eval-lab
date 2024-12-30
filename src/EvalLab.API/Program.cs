@@ -10,10 +10,7 @@ using EvalLab.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.ConfigureHttpJsonOptions(o =>
-{
-  o.SerializerOptions.Converters.Add(new SuccessCriteriaConverter());
-});
+builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new SuccessCriteriaConverter()));
 
 builder.Services.AddRequestDecompression();
 
@@ -30,9 +27,9 @@ builder.Services.AddScoped<IRepository<Evaluation>, MongoEvaluationRepository>()
 builder.Services.AddScoped<IRepository<EvaluationRun>, MongoEvaluationRunRepository>();
 builder.Services.AddScoped<IRepository<Trace>, MongoTraceRepository>();
 
-builder.Services.AddSingleton<ITestRunQueue, TestRunQueue>();
-builder.Services.AddSingleton<ITaskRunProcessor, TaskRunProcessor>();
-builder.Services.AddHostedService<TestRunQueueService>();
+builder.Services.AddSingleton<IEvaluationRunQueue, EvaluationRunQueue>();
+builder.Services.AddSingleton<IEvaluationRunProcessor, EvaluationRunProcessor>();
+builder.Services.AddHostedService<EvaluationRunQueueService>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IAnthropicApiClient>(sp =>
