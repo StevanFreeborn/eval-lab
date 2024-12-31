@@ -1,0 +1,1 @@
+record PipelineRunResponse(string Output);

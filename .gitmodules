@@ -1,0 +1,3 @@
+[submodule "src/EvalLab.OTEL/Proto"]
+	path = src/EvalLab.OTEL/Proto
+	url = https://github.com/open-telemetry/opentelemetry-proto.git

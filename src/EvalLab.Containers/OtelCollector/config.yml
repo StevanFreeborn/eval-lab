@@ -1,0 +1,55 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  tail_sampling/runs:
+    decision_wait: 0s
+    policies: [
+      {
+        name: runs,
+        type: string_attribute,
+        string_attribute: {key: evallab.run, values: [run-*], enabled_regex_matching: true}
+      }
+    ]
+  batch:
+  batch/runs:
+    send_batch_size: 0
+
+exporters:
+  debug:
+    verbosity: detailed
+  otlp/aspire:
+    endpoint: ${env:ASPIRE_OTLP_ENDPOINT}
+    headers:
+      x-otlp-api-key: ${env:ASPIRE_OTLP_API_KEY}
+    tls:
+        insecure: true
+  otlphttp:
+    endpoint: ${env:services__api__http__0}
+    encoding: json
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire]
+    traces/runs:
+      receivers: [otlp]
+      processors: [tail_sampling/runs, batch/runs]
+      exporters: [otlphttp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire]
