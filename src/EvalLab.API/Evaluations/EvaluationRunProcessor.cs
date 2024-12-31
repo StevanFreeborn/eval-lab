@@ -39,7 +39,7 @@ class EvaluationRunProcessor(
 
     foreach (var num in Enumerable.Range(0, run.SampleSize))
     {
-      var pipelineRunResult = await pipeline.RunAsync(httpClient, new(pipeline.Id, evaluation.Input));
+      var pipelineRunResult = await pipeline.RunAsync(httpClient, new(pipeline.Id, run.Input));
 
       var testRun = new TestRun
       {

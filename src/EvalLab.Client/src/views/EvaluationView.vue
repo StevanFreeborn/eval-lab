@@ -23,13 +23,13 @@
   const isValidEvaluation = computed(
     () =>
       evaluation.value !== undefined &&
-      evaluation.value.input &&
       evaluation.value.targetPipelineId &&
       evaluation.value.successCriteria.type !== 'null',
   );
+  const testInput = ref('');
   const evaluationTestResult = ref<
     | {
-        status: 'idle' | 'loading' | 'failed';
+        status: 'idle' | 'entering-input' | 'loading' | 'failed';
       }
     | {
         status: 'success';
@@ -123,20 +123,30 @@
   }
 
   async function handleTestEvaluationClick() {
-    if (evaluation.value) {
-      evaluationTestResult.value = { status: 'loading' };
+    evaluationTestResult.value = { status: 'entering-input' };
+    openDrawer();
+  }
 
-      const testResult = await evaluationsService.test(evaluation.value);
-
-      if (testResult.failed) {
-        console.error(testResult.error.message);
-        evaluationTestResult.value = { status: 'failed' };
-        return;
-      }
-
-      evaluationTestResult.value = { status: 'success', testResult: testResult.value };
-      openDrawer();
+  async function handleTestClick() {
+    if (!evaluation.value) {
+      return;
     }
+
+    evaluationTestResult.value = { status: 'loading' };
+
+    const testResult = await evaluationsService.test({
+      input: testInput.value,
+      evaluation: evaluation.value,
+    });
+
+    if (testResult.failed) {
+      console.error(testResult.error.message);
+      evaluationTestResult.value = { status: 'failed' };
+      return;
+    }
+
+    testInput.value = '';
+    evaluationTestResult.value = { status: 'success', testResult: testResult.value };
   }
 
   async function handlePerformEvaluationClick() {
@@ -201,18 +211,6 @@
     <div class="evaluation-definition">
       <div>
         <div class="card">
-          <h3>Evaluation Input</h3>
-          <div class="form-group">
-            <label>Input</label>
-            <textarea
-              v-model="evaluation.input"
-              required
-              rows="10"
-              :disabled="isEditable === false"
-            ></textarea>
-          </div>
-        </div>
-        <div class="card">
           <h3>Pipeline</h3>
           <div class="form-group">
             <label>Selected Pipeline</label>
@@ -258,16 +256,10 @@
       </div>
       <div class="actions">
         <button
-          v-if="isEditable"
           type="button"
           @click="handleTestEvaluationClick"
           :disabled="!isValidEvaluation"
         >
-          <WaitingSpinner
-            v-if="evaluationTestResult.status === 'loading'"
-            height="1rem"
-            width="1rem"
-          />
           Test Evaluation
         </button>
         <button
@@ -283,7 +275,7 @@
       <PagedTable
         :data="evaluationRunData"
         :columns="[
-          'id',
+          'name',
           'status',
           'successRate',
           'expectedProportion',
@@ -303,9 +295,7 @@
     </div>
   </div>
   <SlideDrawer
-    :heading="
-      evaluationTestResult.status === 'success' ? 'Evaluation Test Result' : 'Perform Evaluation'
-    "
+    :heading="evaluationTestResult.status === 'success' ? 'Test Evaluation' : 'Perform Evaluation'"
     :drawer-open="drawerOpen"
     @drawer-closed="closeDrawer"
   >
@@ -335,9 +325,44 @@
       />
       <TraceViewer :run-id="evaluationTestResult.testResult.pipelineRun.id" />
     </div>
+    <div
+      class="test-input-container"
+      v-else-if="
+        evaluationTestResult.status === 'entering-input' ||
+        evaluationTestResult.status === 'loading'
+      "
+    >
+      <label for="testInput">Test Input</label>
+      <textarea
+        id="testInput"
+        name="testInput"
+        v-model="testInput"
+        rows="10"
+        required
+      ></textarea>
+      <button
+        type="button"
+        :disabled="!testInput"
+        @click="handleTestClick"
+      >
+        <WaitingSpinner
+          v-if="evaluationTestResult.status === 'loading'"
+          height="1rem"
+          width="1rem"
+        />
+        Test
+      </button>
+    </div>
     <div v-else>
       <GenericForm
         :fields="[
+          {
+            name: 'input',
+            label: 'Input',
+            type: 'textarea',
+            required: true,
+            rows: 10,
+          },
           {
             name: 'expectedProportion',
             label: 'Expected Proportion of Runs to Pass (%)',
@@ -380,6 +405,7 @@
             }
 
             return await evaluationRunsService.create({
+              input: fields.input,
               expectedProportion: parseInt(fields.expectedProportion),
               confidenceLevel: parseInt(fields.confidenceLevel),
               marginOfError: parseInt(fields.marginOfError),
@@ -488,6 +514,27 @@
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;
     background-color: var(--secondary-background-color);
+  }
+
+  .test-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .test-input-container label {
+    font-weight: bold;
+  }
+
+  .test-input-container button {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--text-color);
+    border-radius: 0.25rem;
+    width: max-content;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
   }
 
   .test-result-container {

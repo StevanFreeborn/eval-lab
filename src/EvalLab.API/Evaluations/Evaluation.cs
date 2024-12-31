@@ -8,12 +8,11 @@ class Evaluation : Entity
   public string Name { get; init; } = string.Empty;
   public string Description { get; init; } = string.Empty;
   public string TargetPipelineId { get; init; } = string.Empty;
-  public string Input { get; init; } = string.Empty;
   public SuccessCriteria SuccessCriteria { get; init; } = new NullSuccessCriteria();
 
-  public async Task<(bool Passed, PipelineRun PipelineRun)> RunAsync(Pipeline pipeline, HttpClient client)
+  public async Task<(bool Passed, PipelineRun PipelineRun)> RunAsync(string input, Pipeline pipeline, HttpClient client)
   {
-    var runResult = await pipeline.RunAsync(client, new(pipeline.Id, Input));
+    var runResult = await pipeline.RunAsync(client, new(pipeline.Id, input));
 
     if (runResult.Failed)
     {
@@ -25,7 +24,7 @@ class Evaluation : Entity
     return (passed, runResult.Value);
   }
 
-  public async Task<(bool Passed, PipelineRun PipelineRun)> RunAsync(IRepository<Pipeline> pipelineRepo, HttpClient client)
+  public async Task<(bool Passed, PipelineRun PipelineRun)> RunAsync(string input, IRepository<Pipeline> pipelineRepo, HttpClient client)
   {
     var pipeline = await pipelineRepo.GetAsync(FilterSpecification<Pipeline>.From(p => p.Id == TargetPipelineId));
 
@@ -34,7 +33,7 @@ class Evaluation : Entity
       throw new InvalidOperationException("Pipeline not found");
     }
 
-    return await RunAsync(pipeline, client);
+    return await RunAsync(input, pipeline, client);
   }
 }
 

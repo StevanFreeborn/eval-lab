@@ -21,11 +21,15 @@
     <div class="run-content">
       <div class="io-section">
         <label>Input</label>
-        <div class="io-content">{{ run.input }}</div>
+        <div class="io-content">
+          <pre>{{ run.input }}</pre>
+        </div>
       </div>
       <div class="io-section">
         <label>Output</label>
-        <div class="io-content">{{ run.output }}</div>
+        <div class="io-content">
+          <pre>{{ run.output }}</pre>
+        </div>
       </div>
     </div>
     <slot></slot>

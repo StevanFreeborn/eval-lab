@@ -6,7 +6,6 @@ record EvaluationDto(
   string Id,
   string Name,
   string Description,
-  string Input,
   string TargetPipelineId,
   SuccessCriteria SuccessCriteria,
   DateTime CreatedDate,
@@ -17,7 +16,6 @@ record EvaluationDto(
     evaluation.Id,
     evaluation.Name,
     evaluation.Description,
-    evaluation.Input,
     evaluation.TargetPipelineId,
     evaluation.SuccessCriteria,
     evaluation.CreatedDate,
@@ -32,11 +30,6 @@ record EvaluationDto(
     if (string.IsNullOrWhiteSpace(Name))
     {
       results.Add(new ValidationResult("Name is required", [nameof(Name)]));
-    }
-
-    if (string.IsNullOrWhiteSpace(Input))
-    {
-      results.Add(new ValidationResult("Input is required", [nameof(Input)]));
     }
 
     if (string.IsNullOrWhiteSpace(TargetPipelineId))
@@ -60,7 +53,6 @@ record EvaluationDto(
     Name = Name,
     Description = Description,
     TargetPipelineId = TargetPipelineId,
-    Input = Input,
     SuccessCriteria = SuccessCriteria,
     CreatedDate = CreatedDate,
     UpdatedDate = UpdatedDate

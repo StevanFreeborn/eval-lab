@@ -24,9 +24,13 @@ type SuccessCriteria =
 export type Evaluation = NewEvaluation &
   Entity & {
     targetPipelineId: string;
-    input: string;
     successCriteria: SuccessCriteria;
   };
+
+type TestEvaluation = {
+  input: string;
+  evaluation: Evaluation;
+};
 
 export type TestRun = {
   pipelineRun: PipelineRun;
@@ -34,7 +38,7 @@ export type TestRun = {
 };
 
 type EvaluationsService = GenericService<NewEvaluation, Evaluation> & {
-  test: (evaluation: Evaluation) => Promise<Result<TestRun>>;
+  test: (evaluation: TestEvaluation) => Promise<Result<TestRun>>;
 };
 
 type EvaluationsServiceKeyType = InjectionKey<EvaluationsService>;
@@ -45,11 +49,11 @@ const BASE_URL = '/api/evaluations';
 
 export const evaluationsService: EvaluationsService = Object.freeze({
   ...createGenericService(BASE_URL, createEvaluation),
-  test: async function (evaluation) {
-    const response = await makeRequest<TestRun>(`${BASE_URL}/${evaluation.id}/test`, {
+  test: async function (evaluationRun) {
+    const response = await makeRequest<TestRun>(`${BASE_URL}/${evaluationRun.evaluation.id}/test`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(evaluation),
+      body: JSON.stringify(evaluationRun),
     });
 
     if (response.failed) {
@@ -67,7 +71,6 @@ function createEvaluation(data: any): Evaluation {
     name: data.name,
     description: data.description,
     targetPipelineId: data.targetPipelineId,
-    input: data.input,
     successCriteria: createSuccessCriteria(data.successCriteria),
     createdDate: new Date(data.createdDate),
     updatedDate: new Date(data.updatedDate),

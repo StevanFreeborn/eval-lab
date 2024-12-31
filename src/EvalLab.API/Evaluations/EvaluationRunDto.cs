@@ -5,6 +5,7 @@ record EvaluationRunDto
   public string Id { get; init; } = string.Empty;
   public string Name => $"Run {Id}";
   public string EvaluationId { get; init; } = string.Empty;
+  public string Input { get; init; } = string.Empty;
   public int ExpectedProportion { get; init; }
   public int ConfidenceLevel { get; init; }
   public int MarginOfError { get; init; }
@@ -18,6 +19,7 @@ record EvaluationRunDto
   {
     Id = evaluationRun.Id,
     EvaluationId = evaluationRun.EvaluationId,
+    Input = evaluationRun.Input,
     ExpectedProportion = (int)(evaluationRun.ExpectedProportion * 100),
     ConfidenceLevel = (int)(evaluationRun.ConfidenceLevel * 100),
     MarginOfError = (int)(evaluationRun.MarginOfError * 100),

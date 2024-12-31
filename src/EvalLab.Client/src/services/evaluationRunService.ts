@@ -3,6 +3,7 @@ import { Evaluation } from './evaluationService';
 import { createGenericService, Entity, GenericService } from './shared';
 
 export type NewEvaluationRun = {
+  input: string;
   expectedProportion: number;
   confidenceLevel: number;
   marginOfError: number;
@@ -35,6 +36,7 @@ function createEvaluationRun(data: any): EvaluationRun {
   return {
     id: data.id,
     name: data.name,
+    input: data.input,
     expectedProportion: data.expectedProportion,
     confidenceLevel: data.confidenceLevel,
     marginOfError: data.marginOfError,

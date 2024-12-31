@@ -56,7 +56,7 @@ static class EvaluationEndpoints
 
     group.MapPost("{id}/test", async (
       string id,
-      [FromBody] EvaluationDto dto,
+      [FromBody] TestEvaluationDto dto,
       [FromServices] IRepository<Evaluation> evaluationRepo,
       [FromServices] IRepository<Pipeline> pipelineRepo,
       [FromServices] IRepository<PipelineRun> pipelineRunRepo,
@@ -68,7 +68,7 @@ static class EvaluationEndpoints
         return Results.ValidationProblem(results.ToErrors());
       }
 
-      var evaluation = dto.ToEvaluation();
+      var evaluation = dto.Evaluation.ToEvaluation();
       var pipeline = await pipelineRepo.GetAsync(FilterSpecification<Pipeline>.From(p => p.Id == evaluation.TargetPipelineId));
 
       if (pipeline is null)
@@ -76,7 +76,7 @@ static class EvaluationEndpoints
         return Results.BadRequest("Invalid pipeline");
       }
 
-      var (passed, pipelineRun) = await evaluation.RunAsync(pipeline, client);
+      var (passed, pipelineRun) = await evaluation.RunAsync(dto.Input, pipeline, client);
 
       await pipelineRunRepo.CreateAsync(pipelineRun);
 

@@ -13,7 +13,8 @@ class EvaluationRun : Entity
     { 0.99m, 2.58m }
   };
 
-  public string EvaluationId { get; set; } = string.Empty;
+  public string EvaluationId { get; init; } = string.Empty;
+  public string Input { get; init; }
   public decimal ExpectedProportion { get; init; }
   public decimal ConfidenceLevel { get; init; }
   public decimal MarginOfError { get; init; }
@@ -24,12 +25,14 @@ class EvaluationRun : Entity
 
   public EvaluationRun(
     string evaluationId,
+    string input,
     decimal expectedProportion,
     decimal confidenceLevel,
     decimal marginOfError
   )
   {
     EvaluationId = evaluationId;
+    Input = input;
     ExpectedProportion = expectedProportion;
     ConfidenceLevel = confidenceLevel;
     MarginOfError = marginOfError;

@@ -155,7 +155,7 @@
                 v-for="key in columns"
                 :key="key"
               >
-                {{ item[key] instanceof Date ? item[key].toLocaleDateString() : item[key] }}
+                {{ item[key] instanceof Date ? item[key].toLocaleString() : item[key] }}
               </td>
             </tr>
           </tbody>

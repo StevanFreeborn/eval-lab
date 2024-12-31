@@ -78,7 +78,6 @@
     (() => {
       const data: FormData = {};
       props.fields.forEach(field => {
-        console.log(field.default);
         data[field.name] = {
           value: field.default ?? '',
           error: '',

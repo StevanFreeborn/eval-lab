@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace EvalLab.API.Evaluations;
 
 record AddEvaluationRunDto(
+  string Input,
   int ExpectedProportion,
   int ConfidenceLevel,
   int MarginOfError,
@@ -17,6 +18,11 @@ record AddEvaluationRunDto(
   public bool TryValidate(out List<ValidationResult> results)
   {
     results = [];
+
+    if (string.IsNullOrEmpty(Input))
+    {
+      results.Add(new ValidationResult("Input is required", [nameof(Input)]));
+    }
 
     if (ExpectedProportion is < 0 or > MaxPercentage)
     {
@@ -52,6 +58,7 @@ record AddEvaluationRunDto(
 
   public EvaluationRun ToEvaluationRun() => new(
     Evaluation.Id,
+    Input,
     Math.Round(ExpectedProportion / 100m, 2),
     Math.Round(ConfidenceLevel / 100m, 2),
     Math.Round(MarginOfError / 100m, 2)
