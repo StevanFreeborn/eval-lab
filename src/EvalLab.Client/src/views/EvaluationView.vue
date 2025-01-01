@@ -2,6 +2,7 @@
   import { computed, onMounted, ref } from 'vue';
   import { useRoute } from 'vue-router';
   import PagedDropdown from '../components/controls/PagedDropdown.vue';
+  import TextEditor from '../components/controls/TextEditor.vue';
   import GenericForm from '../components/forms/GenericForm.vue';
   import ThumbsDownIcon from '../components/icons/ThumbsDownIcon.vue';
   import ThumbsUpIcon from '../components/icons/ThumbsUpIcon.vue';
@@ -238,10 +239,15 @@
             >
               <option value="null">Select Evaluation Type</option>
               <option>Unstructured Exact Match</option>
+              <option>Unstructured Partial Match</option>
+              <option>JSON Match</option>
             </select>
           </div>
           <div
-            v-if="evaluation.successCriteria.type === 'Unstructured Exact Match'"
+            v-if="
+              evaluation.successCriteria.type === 'Unstructured Exact Match' ||
+              evaluation.successCriteria.type === 'Unstructured Partial Match'
+            "
             class="form-group"
           >
             <label>Match Value</label>
@@ -251,6 +257,16 @@
               rows="1"
               :disabled="isEditable === false"
             ></textarea>
+          </div>
+          <div
+            v-else-if="evaluation.successCriteria.type === 'JSON Match'"
+            class="form-group"
+          >
+            <label>JSON Schema</label>
+            <TextEditor
+              v-model="evaluation.successCriteria.schema"
+              :disabled="isEditable === false"
+            />
           </div>
         </div>
       </div>
@@ -425,6 +441,7 @@
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    padding-bottom: 1rem;
   }
 
   .header {
@@ -474,18 +491,19 @@
 
   .evaluation-definition > div:first-child {
     display: flex;
+    flex-direction: column;
     gap: 1rem;
-    flex-wrap: wrap;
+    width: 100%;
   }
 
   .card {
     display: flex;
     flex-direction: column;
-    flex: 1;
     gap: 1rem;
     background-color: var(--secondary-background-color);
     padding: 1rem;
     border-radius: 0.25rem;
+    width: 100%;
   }
 
   .form-group {

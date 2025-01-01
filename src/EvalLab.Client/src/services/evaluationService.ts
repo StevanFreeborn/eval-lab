@@ -17,8 +17,12 @@ type NewEvaluation = {
 type SuccessCriteria =
   | { type: 'null' }
   | {
-      type: 'Unstructured Exact Match';
+      type: 'Unstructured Exact Match' | 'Unstructured Partial Match';
       matchValue: string;
+    }
+  | {
+      type: 'JSON Match';
+      schema: string;
     };
 
 export type Evaluation = NewEvaluation &
@@ -79,10 +83,17 @@ function createEvaluation(data: any): Evaluation {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createSuccessCriteria(data: any): SuccessCriteria {
-  if (data.type === 'Unstructured Exact Match') {
+  if (data.type === 'Unstructured Exact Match' || data.type === 'Unstructured Partial Match') {
     return {
       type: data.type,
       matchValue: data.matchValue,
+    };
+  }
+
+  if (data.type === 'JSON Match') {
+    return {
+      type: data.type,
+      schema: data.schema,
     };
   }
 

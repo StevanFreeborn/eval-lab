@@ -82,4 +82,8 @@
     padding: 0.75rem;
     border-radius: 0.375rem;
   }
+
+  .io-content pre {
+    overflow: auto;
+  }
 </style>

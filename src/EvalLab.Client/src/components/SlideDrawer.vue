@@ -54,7 +54,7 @@
 
   .drawer.open {
     min-width: 350px;
-    max-width: 100%;
+    max-width: 600px;
     width: fit-content;
   }
 

@@ -18,6 +18,8 @@ class SuccessCriteriaConverter : JsonConverter<SuccessCriteria>
     {
       SuccessCriteriaType.Null => JsonSerializer.Deserialize<NullSuccessCriteria>(root.GetRawText(), options)!,
       SuccessCriteriaType.UnstructuredExactMatch => JsonSerializer.Deserialize<UnstructuredExactMatch>(root.GetRawText(), options)!,
+      SuccessCriteriaType.UnstructuredPartialMatch => JsonSerializer.Deserialize<UnstructuredPartialMatch>(root.GetRawText(), options)!,
+      SuccessCriteriaType.JsonMatch => JsonSerializer.Deserialize<JsonMatch>(root.GetRawText(), options)!,
       _ => throw new JsonException($"Unknown success criteria type: {type}")
     };
   }
