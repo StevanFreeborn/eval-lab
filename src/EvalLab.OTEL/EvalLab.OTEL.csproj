@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="$(MSBuildProjectDirectory)\Proto\**\*.proto" ProtoRoot="$(MSBuildProjectDirectory)\Proto" GrpcServices="None" AdditionalProtocArguments="--csharp_opt=base_namespace" />
+    <Protobuf Include="$(MSBuildProjectDirectory)\Proto\**\*.proto" ProtoRoot="$(MSBuildProjectDirectory)\Proto" GrpcServices="None" />
   </ItemGroup>
 
 </Project>
